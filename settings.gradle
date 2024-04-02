@@ -23,10 +23,12 @@ rootProject.name = 'module-ballerinax-wso2.controlplane'
 include ':checkstyle'
 include ':wso2.controlplane-native'
 include ':wso2.controlplane-ballerina'
+include ':wso2.controlplane-compiler-plugin'
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(':wso2.controlplane-native').projectDir = file('native')
 project(':wso2.controlplane-ballerina').projectDir = file('ballerina')
+project(':wso2.controlplane-compiler-plugin').projectDir = file('compiler-plugin')
 
 gradleEnterprise {
     buildScan {

@@ -23,6 +23,7 @@ plugins {
 
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.ballerinaTomlParserVersion = project.ballerinaTomlParserVersion
+ext.googleGsonVersion = "2.7"
 
 ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 
