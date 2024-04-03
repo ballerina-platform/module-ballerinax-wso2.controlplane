@@ -82,7 +82,6 @@ public class Utils {
         Type artifactType = TypeUtils.getImpliedType(typedesc.getDescribingType());
         List<Artifact> artifacts = env.getRepository().getArtifacts();
         List<BListInitialValueEntry> artifactEntries = new ArrayList<>();
-        int index = 0;
         for (Artifact artifact : artifacts) {
             BObject serviceObj = (BObject) artifact.getDetail("service");
             Type originalType = serviceObj.getOriginalType();
