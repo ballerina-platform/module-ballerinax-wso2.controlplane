@@ -16,22 +16,13 @@
 
 package org.ballerinax.wso2.controlplane;
 
-import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
-import org.ballerinalang.model.elements.Flag;
-import org.ballerinalang.model.tree.AnnotationAttachmentNode;
-import org.ballerinalang.model.tree.ServiceNode;
-import org.ballerinalang.util.diagnostic.DiagnosticLog;
+import io.ballerina.projects.plugins.CompilerPlugin;
+import io.ballerina.projects.plugins.CompilerPluginContext;
 
-import java.util.List;
-
-public class ControlPlaneCompilerPlugin extends AbstractCompilerPlugin {
+public class ControlPlaneCompilerPlugin extends CompilerPlugin {
 
     @Override
-    public void init(DiagnosticLog diagnosticLog) {
-    }
+    public void init(CompilerPluginContext compilerPluginContext) {
 
-    @Override
-    public void process(ServiceNode serviceNode, List<AnnotationAttachmentNode> annotations) {
-        serviceNode.addFlag(Flag.SERVICE);
     }
 }
