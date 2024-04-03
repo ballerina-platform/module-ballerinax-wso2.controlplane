@@ -1,0 +1,38 @@
+/*
+ * Copyright (c) 2024, WSO2 LLC. (http://wso2.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+plugins {
+    id "com.gradle.enterprise" version "3.13.2"
+}
+
+rootProject.name = 'module-ballerinax-wso2.controlplane'
+
+include ':checkstyle'
+include ':wso2.controlplane-native'
+include ':wso2.controlplane-ballerina'
+include ':wso2.controlplane-compiler-plugin'
+
+project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
+project(':wso2.controlplane-native').projectDir = file('native')
+project(':wso2.controlplane-ballerina').projectDir = file('ballerina')
+project(':wso2.controlplane-compiler-plugin').projectDir = file('compiler-plugin')
+
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}
