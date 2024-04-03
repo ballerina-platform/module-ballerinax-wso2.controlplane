@@ -1,6 +1,0 @@
-[plugin]
-id = "wso2.controlplane-compiler-plugin"
-class = "org.ballerinax.wso2.controlplane.ControlPlaneCompilerPlugin"
-
-[[dependency]]
-path = "../compiler-plugin/build/libs/wso2.controlplane-compiler-plugin-1.0.0-SNAPSHOT.jar"
