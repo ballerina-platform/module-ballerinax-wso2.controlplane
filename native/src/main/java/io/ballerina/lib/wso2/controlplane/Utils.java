@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.AnnotatableType;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
@@ -38,6 +39,7 @@ import io.ballerina.runtime.api.values.BTypedesc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BALLERINA_HOME;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BALLERINA_VERSION;
@@ -93,8 +95,7 @@ public class Utils {
             service.put(StringUtils.fromString("name"), StringUtils.fromString(originalType.toString()));
             service.put(StringUtils.fromString("attachPoint"), getAttachPointString(artifact));
             service.put(StringUtils.fromString("metadata"), getServiceMetadata(artifact, serviceObj, currentModule));
-            service.put(StringUtils.fromString("annotations"), getServiceAnnotations(artifact, serviceObj,
-                    artifactType));
+            service.put(StringUtils.fromString("annotations"), getServiceAnnotations(serviceObj));
             artifactEntries.add(ValueCreator.createListInitialValueEntry(
                     ValueCreator.createReadonlyRecordValue(currentModule, "Service", service)));
         }
@@ -111,6 +112,7 @@ public class Utils {
             BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
             listenerRecord.put(StringUtils.fromString("type"), StringUtils.fromString(listener.getOriginalType()
                     .toString()));
+            // Need to add listener properties according to the listener type
             BMap<BString, Object> properties = getMapAnydataValue();
             addListenerProperty(listener, "port", properties);
             listenerRecord.put(StringUtils.fromString("properties"), properties);
@@ -129,8 +131,13 @@ public class Utils {
         return ValueCreator.createMapValue(TypeCreator.createMapType(PredefinedTypes.TYPE_ANYDATA));
     }
 
-    private static Object getServiceAnnotations(Artifact artifact, BObject serviceObj, Type artifactType) {
-        return getMapAnydataValue();
+    private static Object getServiceAnnotations(BObject serviceObj) {
+        BMap<BString, Object> mapValue = getMapAnydataValue();
+        AnnotatableType serviceType = (AnnotatableType) TypeUtils.getImpliedType(serviceObj.getOriginalType());
+        for (Map.Entry<BString, Object> entry : serviceType.getAnnotations().entrySet()) {
+            mapValue.put(entry.getKey(), entry.getValue());
+        }
+        return mapValue;
     }
 
 
