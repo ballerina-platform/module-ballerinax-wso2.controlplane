@@ -98,28 +98,6 @@ subprojects {
     }
 }
 
-
-task codeCoverageReport(type: JacocoReport) {
-    dependsOn('prometheus-extension-ballerina:extractBallerinaClassFiles')
-
-    executionData fileTree(project.rootDir.absolutePath).include("**/*.exec")
-
-    additionalClassDirs files("${buildDir}/classes")
-
-    reports {
-        xml.required = true
-        html.required = true
-        csv.required = true
-        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
-        html.destination = new File("${buildDir}/reports/jacoco/report.html")
-        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
-    }
-
-    onlyIf = {
-        true
-    }
-}
-
 def moduleVersion = project.version
 if (moduleVersion.indexOf('-') != -1) {
     moduleVersion = moduleVersion.substring(0, moduleVersion.indexOf('-'))
