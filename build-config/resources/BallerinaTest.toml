@@ -5,3 +5,6 @@ version = "@toml.version@"
 
 [platform.java17]
 graalvmCompatible = true
+
+[build-options]
+remoteManagement=true
