@@ -140,7 +140,6 @@ public class Utils {
         return mapValue;
     }
 
-
     private static void addListenerProperty(BObject listener, String fieldName, BMap<BString, Object> properties) {
         try {
             Object value = listener.get(StringUtils.fromString(fieldName));
