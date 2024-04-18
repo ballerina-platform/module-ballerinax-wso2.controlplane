@@ -15,7 +15,7 @@
 // under the License.
 
 type IntegrationPlaneConnectionRequest record {
-    string product = "mi"; // should be bal
+    string product = "bal";
     string groupId;
     string nodeId;
     int interval;
