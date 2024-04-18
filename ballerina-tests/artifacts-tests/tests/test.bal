@@ -48,5 +48,4 @@ service /hello on new http:Listener(testPort) {
     resource function get greeting() returns string {
         return "Hello, World!";
     }
-
 }
