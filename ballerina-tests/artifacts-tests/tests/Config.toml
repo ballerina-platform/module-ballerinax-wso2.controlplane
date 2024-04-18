@@ -1,0 +1,13 @@
+testURL = "https://localhost:9165/"
+testPort = 9090
+
+[ballerinax.wso2.controlplane]
+keyStorePath = "../resources/certsandkeys/ballerinaKeystore.p12"
+icpServicePort = 9165
+
+[ballerinax.wso2.controlplane.dashboard]
+url = "https://localhost:9743/dashboard/api"
+heartbeatInterval = 5
+groupId = "bal_dev"
+nodeId = "dev_node_3"
+mgtApiUrl ="https://localhost:9165/management/"

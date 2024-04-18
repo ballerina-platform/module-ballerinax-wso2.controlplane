@@ -1,0 +1,10 @@
+[package]
+org = "ballerinax"
+name = "@package.name@"
+version = "@toml.version@"
+
+[platform.java17]
+graalvmCompatible = true
+
+[build-options]
+remoteManagement=true

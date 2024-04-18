@@ -1,6 +1,7 @@
 ## Package Overview
 
-
+The `wso2.controlplane` library is one of the external library packages, it provides internal support for exposing 
+Ballerina runtime artifacts to the integration control plane.
 
 ## Report Issues
 
