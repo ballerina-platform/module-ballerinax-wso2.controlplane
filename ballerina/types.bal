@@ -73,6 +73,7 @@ public type Listener record {
 
 public type Node record {
     string id;
+    string platformName = "ballerina";
     string? platformVersion;
     string? ballerinaHome;
     string? osName;
