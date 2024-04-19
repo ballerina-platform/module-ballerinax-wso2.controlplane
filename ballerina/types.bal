@@ -15,7 +15,7 @@
 // under the License.
 
 type IntegrationPlaneConnectionRequest record {
-    string product = "mi"; // should be bal
+    string product = "bal";
     string groupId;
     string nodeId;
     int interval;
@@ -71,14 +71,10 @@ public type Listener record {
     map<anydata> properties;
 };
 
-public type NodeData record {
-    string? ballerinaVersion;
-    string? ballerinaHome;
-    string? os;
-    string? osVersion;
-};
-
 public type Node record {
     string id;
-    NodeData nodeData;
+    string? platformVersion;
+    string? ballerinaHome;
+    string? osName;
+    string? osVersion;
 };

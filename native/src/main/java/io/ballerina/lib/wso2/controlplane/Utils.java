@@ -42,12 +42,10 @@ import java.util.List;
 import java.util.Map;
 
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BALLERINA_HOME;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BALLERINA_VERSION;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PLATFORM_VERSION;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BAL_HOME;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BAL_VERSION;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.ID;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.NODE_DATA;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.OS;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.OS_NAME;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.OS_VERSION;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PATH_SEPARATOR;
@@ -63,19 +61,15 @@ public class Utils {
         Module currentModule = env.getCurrentModule();
         Node node = env.getRepository().getNode();
         BMap<BString, Object> nodeEntries = ValueCreator.createMapValue();
-        BMap<BString, Object> metadataEntries = ValueCreator.createMapValue();
-        metadataEntries.put(StringUtils.fromString(BALLERINA_VERSION),
-                StringUtils.fromString((String) node.getDetail(BAL_VERSION)));
-        metadataEntries.put(StringUtils.fromString(BALLERINA_HOME),
-                StringUtils.fromString((String) node.getDetail(BAL_HOME)));
-        metadataEntries.put(StringUtils.fromString(OS),
-                StringUtils.fromString((String) node.getDetail(OS_NAME)));
-        metadataEntries.put(StringUtils.fromString(OS_VERSION),
-                StringUtils.fromString((String) node.getDetail(OS_VERSION)));
-        BMap<BString, Object> nodeData = ValueCreator.createReadonlyRecordValue(currentModule,
-                "NodeData", metadataEntries);
         nodeEntries.put(StringUtils.fromString(ID), StringUtils.fromString(node.nodeId));
-        nodeEntries.put(StringUtils.fromString(NODE_DATA), nodeData);
+        nodeEntries.put(StringUtils.fromString(PLATFORM_VERSION),
+                StringUtils.fromString((String) node.getDetail(BAL_VERSION)));
+        nodeEntries.put(StringUtils.fromString(BALLERINA_HOME),
+                StringUtils.fromString((String) node.getDetail(BAL_HOME)));
+        nodeEntries.put(StringUtils.fromString(ControlPlaneConstants.OS_NAME),
+                StringUtils.fromString((String) node.getDetail(OS_NAME)));
+        nodeEntries.put(StringUtils.fromString(OS_VERSION),
+                StringUtils.fromString((String) node.getDetail(OS_VERSION)));
         return ValueCreator.createReadonlyRecordValue(currentModule, "Node", nodeEntries);
     }
 
