@@ -71,14 +71,11 @@ public type Listener record {
     map<anydata> properties;
 };
 
-public type NodeData record {
-    string? ballerinaVersion;
-    string? ballerinaHome;
-    string? os;
-    string? osVersion;
-};
-
 public type Node record {
     string id;
-    NodeData nodeData;
+    string platformName = "ballerina";
+    string? platformVersion;
+    string? ballerinaHome;
+    string? osName;
+    string? osVersion;
 };
