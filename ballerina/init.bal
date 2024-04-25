@@ -35,12 +35,14 @@ function registerInDashboardServer() returns error? {
             enable: false
         }
     );
+
     IntegrationPlaneConnectionRequest connectionRequest = {
         groupId: dashboard.groupId,
         nodeId: dashboard.nodeId,
         interval: dashboard.heartbeatInterval,
         mgtApiUrl: dashboard.mgtApiUrl
     };
+
     boolean isFailed = true;
     while (true) {
         http:Response|http:ClientError resp = dsClient->post("/heartbeat", connectionRequest);

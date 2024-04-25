@@ -1,4 +1,4 @@
-testURL = "https://localhost:9165/"
+testURL = "https://localhost:9165"
 testPort = 9090
 
 [ballerinax.wso2.controlplane]
