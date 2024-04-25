@@ -18,27 +18,20 @@ package io.ballerina.lib.wso2.controlplane;
 
 import io.ballerina.runtime.api.Artifact;
 import io.ballerina.runtime.api.Module;
-import io.ballerina.runtime.api.PredefinedTypes;
-import io.ballerina.runtime.api.TypeTags;
-import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.AnnotatableType;
-import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.utils.TypeUtils;
-import io.ballerina.runtime.api.values.BArray;
-import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BListInitialValueEntry;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PATH_SEPARATOR;
+import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.LISTENER_NAMES_MAP;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -49,87 +42,70 @@ public class ListenerArtifactHandler {
 
     public List<BListInitialValueEntry> getListenerList(Module currentModule) {
         List<BListInitialValueEntry> artifactEntries = new ArrayList<>();
-        for (Artifact artifact : ArtifactUtils.artifacts) {
-            BObject serviceObj = (BObject) artifact.getDetail("service");
-            Type originalType = serviceObj.getOriginalType();
-            Module module = originalType.getPackage();
-            if (module != null && module.equals(currentModule)) {
-                continue;
-            }
-            BMap<BString, Object> service = ValueCreator.createMapValue();
-            service.put(StringUtils.fromString("name"), StringUtils.fromString(originalType.toString()));
-            service.put(StringUtils.fromString("type"), "Service");
-            service.put(StringUtils.fromString("metadata"), getServiceMetadata(artifact, serviceObj, currentModule));
-            service.put(StringUtils.fromString("annotations"), getServiceAnnotations(serviceObj));
-            artifactEntries.add(ValueCreator.createListInitialValueEntry(ValueCreator.createReadonlyRecordValue(currentModule, "Service", service)));
+        Set<BObject> listeners = getNonDuplicatedListeners(ArtifactUtils.artifacts, currentModule);
+        for (BObject listener : listeners) {
+            artifactEntries.add(ValueCreator.createListInitialValueEntry(getServiceListener(listener, currentModule)));
         }
         return artifactEntries;
     }
 
-    public BMap<BString, Object> getDetailedListener(BObject listener, Module currentModule) {
-//        BObject serviceObj = (BObject) artifact.getDetail("service");
-//        Type originalType = serviceObj.getOriginalType();
-        BMap<BString, Object> service = ValueCreator.createMapValue();
-//        service.put(StringUtils.fromString("name"), StringUtils.fromString(originalType.toString()));
-//        service.put(StringUtils.fromString("type"), "Service");
-//        service.put(StringUtils.fromString("metadata"), getServiceMetadata(artifact, serviceObj, currentModule));
-//        service.put(StringUtils.fromString("annotations"), getServiceAnnotations(serviceObj));
-        return ValueCreator.createReadonlyRecordValue(currentModule, "Service", service);
-
-    }
-
-    private static BMap<BString, Object> getServiceMetadata(Artifact artifact, BObject serviceObj, Module module) {
-        BMap<BString, Object> metadata = ValueCreator.createRecordValue(module, "Metadata");
-        List<BObject> listeners = (List<BObject>) artifact.getDetail("listeners");
-        BListInitialValueEntry[] listenerEntries = new BListInitialValueEntry[listeners.size()];
-        for (int i = 0; i < listeners.size(); i++) {
-            BObject listener = listeners.get(i);
-            BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
-            listenerRecord.put(StringUtils.fromString("type"), StringUtils.fromString(listener.getOriginalType().toString()));
-            // Need to add listener properties according to the listener type
-            BMap<BString, Object> properties = getMapAnydataValue();
-            addListenerProperty(listener, "port", properties);
-            listenerRecord.put(StringUtils.fromString("properties"), properties);
-            listenerEntries[i] = ValueCreator.createListInitialValueEntry(ValueCreator.createReadonlyRecordValue(module, "Listener", listenerRecord));
-        }
-        ArrayType arrayType = TypeCreator.createArrayType(TypeUtils.getType(ValueCreator.createRecordValue(module, "Listener")), true);
-        metadata.put(StringUtils.fromString("listeners"), ValueCreator.createArrayValue(arrayType, listenerEntries));
-        metadata.put(StringUtils.fromString("metadata"), getMapAnydataValue());
-        return metadata;
-    }
-
-    private static BMap<BString, Object> getMapAnydataValue() {
-        return ValueCreator.createMapValue(TypeCreator.createMapType(PredefinedTypes.TYPE_ANYDATA));
-    }
-
-    private static Object getServiceAnnotations(BObject serviceObj) {
-        BMap<BString, Object> mapValue = getMapAnydataValue();
-        AnnotatableType serviceType = (AnnotatableType) TypeUtils.getImpliedType(serviceObj.getOriginalType());
-        for (Map.Entry<BString, Object> entry : serviceType.getAnnotations().entrySet()) {
-            mapValue.put(entry.getKey(), entry.getValue());
-        }
-        return mapValue;
-    }
-
-    private static void addListenerProperty(BObject listener, String fieldName, BMap<BString, Object> properties) {
-        try {
-            Object value = listener.get(StringUtils.fromString(fieldName));
-            properties.put(StringUtils.fromString(fieldName), value);
-        } catch (BError e) {
-            // this means no such field in the object
-        }
-    }
-
-    private static Object getAttachPointString(Artifact artifact) {
-        Object attachPoint = artifact.getDetail("attachPoint");
-        if (TypeUtils.getType(attachPoint).getTag() == TypeTags.ARRAY_TAG) {
-            BArray array = (BArray) attachPoint;
-            StringBuilder attachPointStr = new StringBuilder();
-            for (int i = 0; i < array.size(); i++) {
-                attachPointStr.append(PATH_SEPARATOR).append(array.getBString(i).getValue());
+    private Set<BObject> getNonDuplicatedListeners(List<Artifact> artifacts, Module currentModule) {
+        Set<BObject> listeners = new HashSet<>();
+        for (Artifact artifact : artifacts) {
+            if (Utils.isControlPlaneService((BObject) artifact.getDetail("service"), currentModule)) {
+                continue;
             }
-            return StringUtils.fromString(attachPointStr.toString());
+            listeners.addAll((List<BObject>) artifact.getDetail("listeners"));
         }
-        return attachPoint;
+        return listeners;
     }
+
+    public BMap<BString, Object> getDetailedListener(BObject listener, Module currentModule) {
+        // {
+        //    "package": "testOrg/artifacts_tests:1",
+        //    "httpVersion": "1.1",
+        //    "host": "localhost",
+        //    "timeout": "30000",
+        //    "requestsLimit": {
+        //        "maxUriLength": "32768",
+        //        "maxHeaderSize": "8192",
+        //        "maxEntityBodySize": "5242880"
+        //    }
+        //}
+        Type originalType = listener.getOriginalType();
+        BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
+        listenerRecord.put(StringUtils.fromString("package"),
+                StringUtils.fromString(originalType.getPackage().toString()));
+        BMap<BString, Object> config = (BMap<BString, Object>)
+                listener.get(StringUtils.fromString("inferredConfig"));
+        listenerRecord.put(StringUtils.fromString("httpVersion"),
+                StringUtils.fromString(config.get(StringUtils.fromString("httpVersion")).toString()));
+        listenerRecord.put(StringUtils.fromString("host"),
+                StringUtils.fromString(config.get(StringUtils.fromString("host")).toString()));
+        listenerRecord.put(StringUtils.fromString("timeout"),
+                config.get(StringUtils.fromString("timeout")));
+        listenerRecord.put(StringUtils.fromString("requestLimit"), getRequestLimit(config, currentModule));
+        return ValueCreator.createReadonlyRecordValue(currentModule, "ListenerDetail", listenerRecord);
+    }
+
+    private static BMap<BString, Object> getRequestLimit(BMap<BString, Object> config, Module module) {
+        return ValueCreator.createReadonlyRecordValue(module, "RequestLimit",
+                (BMap<BString, Object>) config.getMapValue(StringUtils.fromString("requestLimits")));
+    }
+
+    public static BMap<BString, Object> getServiceListener(BObject listener, Module module) {
+        BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
+        listenerRecord.put(StringUtils.fromString("name"), StringUtils.fromString(LISTENER_NAMES_MAP.get(listener)));
+        listenerRecord.put(StringUtils.fromString("protocol"), getListenerProtocol(listener));
+        listenerRecord.put(StringUtils.fromString("port"), listener.get(StringUtils.fromString("port")));
+        return ValueCreator.createReadonlyRecordValue(module, "Listener", listenerRecord);
+    }
+
+    private static BString getListenerProtocol(BObject listener) {
+        BMap<BString, Object> config = (BMap<BString, Object>)
+                listener.get(StringUtils.fromString("inferredConfig"));
+        Object secureSocket = config.get(StringUtils.fromString("secureSocket"));
+        return StringUtils.fromString(secureSocket == null ? "HTTP" : "HTTPS");
+    }
+
 }

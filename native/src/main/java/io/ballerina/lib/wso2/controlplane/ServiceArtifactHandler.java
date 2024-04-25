@@ -36,8 +36,8 @@ import io.ballerina.runtime.api.values.BString;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.listenerNamesMap;
-import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.serviceNamesMap;
+import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.LISTENER_NAMES_MAP;
+import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.SERVICE_NAMES_MAP;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PATH_SEPARATOR;
 
 /**
@@ -55,9 +55,10 @@ public class ServiceArtifactHandler {
                 continue;
             }
             BMap<BString, Object> service = ValueCreator.createMapValue();
-            service.put(StringUtils.fromString("name"), StringUtils.fromString(serviceNamesMap.get(serviceObj)));
+            service.put(StringUtils.fromString("name"), StringUtils.fromString(SERVICE_NAMES_MAP.get(serviceObj)));
             service.put(StringUtils.fromString("basePath"), getAttachPointString(artifact));;
-            artifactEntries.add(ValueCreator.createListInitialValueEntry(ValueCreator.createReadonlyRecordValue(currentModule, "Service", service)));
+            artifactEntries.add(ValueCreator.createListInitialValueEntry(
+                    ValueCreator.createReadonlyRecordValue(currentModule, "Service", service)));
         }
         return artifactEntries;
     }
@@ -70,29 +71,6 @@ public class ServiceArtifactHandler {
                 artifact.getDetail("listeners"), currentModule));
         service.put(StringUtils.fromString("resources"), getServiceResources(serviceObj, currentModule));
         return ValueCreator.createReadonlyRecordValue(currentModule, "ServiceDetail", service);
-    }
-
-    private static BArray getServiceListeners(List<BObject> listeners, Module module) {
-        BListInitialValueEntry[] listenerEntries = new BListInitialValueEntry[listeners.size()];
-        for (int i = 0; i < listeners.size(); i++) {
-            BObject listener = listeners.get(i);
-            BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
-            listenerRecord.put(StringUtils.fromString("name"), StringUtils.fromString(listenerNamesMap.get(listener)));
-            listenerRecord.put(StringUtils.fromString("protocol"), getListenerProtocol(listener));
-            listenerRecord.put(StringUtils.fromString("port"), listener.get(StringUtils.fromString("port")));
-            listenerEntries[i] = ValueCreator.createListInitialValueEntry(
-                    ValueCreator.createReadonlyRecordValue(module, "Listener", listenerRecord));
-        }
-        ArrayType arrayType = TypeCreator.createArrayType(TypeUtils.getType(
-                ValueCreator.createRecordValue(module, "Listener")), true);
-        return ValueCreator.createArrayValue(arrayType, listenerEntries);
-    }
-
-    private static BString getListenerProtocol(BObject listener) {
-        BMap<BString, Object> config = (BMap<BString, Object>)
-                listener.get(StringUtils.fromString("inferredConfig"));
-        Object secureSocket = config.get(StringUtils.fromString("secureSocket"));
-        return StringUtils.fromString(secureSocket == null ? "HTTP" : "HTTPS");
     }
 
     private static Object getServiceResources(BObject serviceObj, Module currentModule) {
@@ -150,4 +128,29 @@ public class ServiceArtifactHandler {
         }
         return attachPoint;
     }
+
+    private BArray getServiceListeners(List<BObject> listeners, Module module) {
+        BListInitialValueEntry[] listenerEntries = new BListInitialValueEntry[listeners.size()];
+        for (int i = 0; i < listeners.size(); i++) {
+            BObject listener = listeners.get(i);
+            BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
+            listenerRecord.put(StringUtils.fromString("name"),
+                    StringUtils.fromString(LISTENER_NAMES_MAP.get(listener)));
+            listenerRecord.put(StringUtils.fromString("protocol"), getListenerProtocol(listener));
+            listenerRecord.put(StringUtils.fromString("port"), listener.get(StringUtils.fromString("port")));
+            listenerEntries[i] = ValueCreator.createListInitialValueEntry(
+                    ValueCreator.createReadonlyRecordValue(module, "Listener", listenerRecord));
+        }
+        ArrayType arrayType = TypeCreator.createArrayType(TypeUtils.getType(
+                ValueCreator.createRecordValue(module, "Listener")), true);
+        return ValueCreator.createArrayValue(arrayType, listenerEntries);
+    }
+
+    private BString getListenerProtocol(BObject listener) {
+        BMap<BString, Object> config = (BMap<BString, Object>)
+                listener.get(StringUtils.fromString("inferredConfig"));
+        Object secureSocket = config.get(StringUtils.fromString("secureSocket"));
+        return StringUtils.fromString(secureSocket == null ? "HTTP" : "HTTPS");
+    }
+
 }
