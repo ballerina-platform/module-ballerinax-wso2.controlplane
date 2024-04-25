@@ -45,7 +45,7 @@ service /management on securedEP {
                 list: artifacts
             };
         }
-        return getDetailedArtifact(resourceType, name, ArtifactDetail);
+        return getDetailedArtifact(resourceType, name);
     }
 }
 
@@ -53,7 +53,7 @@ isolated function getBallerinaNode() returns Node|error = @java:Method {
     'class: "io.ballerina.lib.wso2.controlplane.Utils"
 } external;
 
-isolated function getDetailedArtifact(string resourceType, string name, typedesc<anydata> t) returns ArtifactDetail|error =
+isolated function getDetailedArtifact(string resourceType, string name) returns ArtifactDetail|error =
 @java:Method {
     'class: "io.ballerina.lib.wso2.controlplane.ArtifactUtils"
 } external;

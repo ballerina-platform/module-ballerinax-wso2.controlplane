@@ -33,7 +33,7 @@ public function testGetBallerinaNode() returns error? {
 }
 
 @test:Config {}
-public function testGetBallerinaArtifacts() returns error? {
+public function testGetBallerinaServiceArtifacts() returns error? {
     http:Client rmClient = check new (testURL,
         secureSocket = {
             enable: false
@@ -45,6 +45,21 @@ public function testGetBallerinaArtifacts() returns error? {
 
     cp:ArtifactDetail|error artifact = rmClient->/management/services(name = "service_1");
     test:assertTrue(artifact is cp:ServiceDetail, "Invalid response received");
+}
+
+@test:Config {}
+public function testGetBallerinaListenerArtifacts() returns error? {
+    http:Client rmClient = check new (testURL,
+        secureSocket = {
+            enable: false
+        }
+    );
+    cp:Artifacts|error artifacts = rmClient->/management/listeners();
+    test:assertTrue(artifacts is cp:Artifacts, "Invalid response received");
+    test:assertTrue(artifacts.count() == 1, "No services found");
+
+    cp:ArtifactDetail|error artifact = rmClient->/management/listeners(name = "listener_1");
+    test:assertTrue(artifact is cp:ListenerDetail, "Invalid response received");
 }
 
 service /hello on new http:Listener(testPort) {

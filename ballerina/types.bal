@@ -82,7 +82,7 @@ public type Listener record {
     int port;
 };
 
-public type RequestsLimit record {
+public type RequestLimit record {
     int maxUriLength;
     int maxHeaderSize;
     int maxEntityBodySize;
@@ -92,8 +92,8 @@ public type ListenerDetail record {
     string package;
     string httpVersion;
     string host;
-    int timeout;
-    RequestsLimit requestsLimit;
+    decimal timeout;
+    RequestLimit requestLimit;
 };
 
 public type Node record {

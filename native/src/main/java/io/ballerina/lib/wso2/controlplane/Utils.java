@@ -50,7 +50,8 @@ public class Utils {
                 StringUtils.fromString((String) node.getDetail(BAL_HOME)));
         nodeEntries.put(StringUtils.fromString(ControlPlaneConstants.OS_NAME),
                 StringUtils.fromString((String) node.getDetail(OS_NAME)));
-        nodeEntries.put(StringUtils.fromString(OS_VERSION), StringUtils.fromString((String) node.getDetail(OS_VERSION)));
+        nodeEntries.put(StringUtils.fromString(OS_VERSION),
+                StringUtils.fromString((String) node.getDetail(OS_VERSION)));
         return ValueCreator.createReadonlyRecordValue(currentModule, "Node", nodeEntries);
     }
 
@@ -66,6 +67,4 @@ public class Utils {
         Module module = originalType.getPackage();
         return module != null && module.equals(currentModule);
     }
-
-
 }
