@@ -51,28 +51,52 @@ public type Artifacts record {
     Artifact[] list;
 };
 
-public type Artifact Service;
+public enum ArtifactType {
+    SERVICE = "services",
+    LISTENER = "listeners"
+}
+
+public type Artifact Service|Listener;
+
+public type ArtifactDetail ServiceDetail|ListenerDetail;
 
 public type Service record {
     string name;
-    string? attachPoint;
-    Metadata metadata;
-    map<anydata> annotations;
+    string? basePath;
 };
 
-public type Metadata record {
+public type ServiceDetail record {
+    string package;
     Listener[] listeners;
-    map<anydata> metadata;
+    Resource[] resources;
+};
+
+public type Resource record {
+    string[] methods;
+    string url;
 };
 
 public type Listener record {
-    string 'type;
+    string name;
     string? protocol;
-    map<anydata> properties;
+    int port;
+};
+
+public type RequestsLimit record {
+    int maxUriLength;
+    int maxHeaderSize;
+    int maxEntityBodySize;
+};
+
+public type ListenerDetail record {
+    string package;
+    string httpVersion;
+    string host;
+    int timeout;
+    RequestsLimit requestsLimit;
 };
 
 public type Node record {
-    string id;
     string platformName = "ballerina";
     string? platformVersion;
     string? ballerinaHome;
