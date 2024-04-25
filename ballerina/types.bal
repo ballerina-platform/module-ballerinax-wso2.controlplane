@@ -93,7 +93,7 @@ public type ListenerDetail record {
     string httpVersion;
     string host;
     decimal timeout;
-    RequestLimit requestLimit;
+    RequestLimit requestLimits;
 };
 
 public type Node record {

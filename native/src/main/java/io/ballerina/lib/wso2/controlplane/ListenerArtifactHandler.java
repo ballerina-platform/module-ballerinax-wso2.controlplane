@@ -31,7 +31,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.LISTENER_NAMES_MAP;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.HOST;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.HTTP_VERSION;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.INFERRED_CONFIG;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENERS;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENER_DETAIL;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PACKAGE;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.REQUEST_LIMIT;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.REQUEST_LIMITS;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.TIMEOUT;
+import static io.ballerina.lib.wso2.controlplane.Utils.getServiceListener;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -52,60 +62,34 @@ public class ListenerArtifactHandler {
     private Set<BObject> getNonDuplicatedListeners(List<Artifact> artifacts, Module currentModule) {
         Set<BObject> listeners = new HashSet<>();
         for (Artifact artifact : artifacts) {
-            if (Utils.isControlPlaneService((BObject) artifact.getDetail("service"), currentModule)) {
+            if (Utils.isControlPlaneService((BObject) artifact.getDetail(SERVICE), currentModule)) {
                 continue;
             }
-            listeners.addAll((List<BObject>) artifact.getDetail("listeners"));
+            listeners.addAll((List<BObject>) artifact.getDetail(LISTENERS));
         }
         return listeners;
     }
 
     public BMap<BString, Object> getDetailedListener(BObject listener, Module currentModule) {
-        // {
-        //    "package": "testOrg/artifacts_tests:1",
-        //    "httpVersion": "1.1",
-        //    "host": "localhost",
-        //    "timeout": "30000",
-        //    "requestsLimit": {
-        //        "maxUriLength": "32768",
-        //        "maxHeaderSize": "8192",
-        //        "maxEntityBodySize": "5242880"
-        //    }
-        //}
         Type originalType = listener.getOriginalType();
         BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
-        listenerRecord.put(StringUtils.fromString("package"),
+        listenerRecord.put(StringUtils.fromString(PACKAGE),
                 StringUtils.fromString(originalType.getPackage().toString()));
         BMap<BString, Object> config = (BMap<BString, Object>)
-                listener.get(StringUtils.fromString("inferredConfig"));
-        listenerRecord.put(StringUtils.fromString("httpVersion"),
-                StringUtils.fromString(config.get(StringUtils.fromString("httpVersion")).toString()));
-        listenerRecord.put(StringUtils.fromString("host"),
-                StringUtils.fromString(config.get(StringUtils.fromString("host")).toString()));
-        listenerRecord.put(StringUtils.fromString("timeout"),
-                config.get(StringUtils.fromString("timeout")));
-        listenerRecord.put(StringUtils.fromString("requestLimit"), getRequestLimit(config, currentModule));
-        return ValueCreator.createReadonlyRecordValue(currentModule, "ListenerDetail", listenerRecord);
+                listener.get(StringUtils.fromString(INFERRED_CONFIG));
+        listenerRecord.put(StringUtils.fromString(HTTP_VERSION),
+                StringUtils.fromString(config.get(StringUtils.fromString(HTTP_VERSION)).toString()));
+        listenerRecord.put(StringUtils.fromString(HOST),
+                StringUtils.fromString(config.get(StringUtils.fromString(HOST)).toString()));
+        listenerRecord.put(StringUtils.fromString(TIMEOUT),
+                config.get(StringUtils.fromString(TIMEOUT)));
+        listenerRecord.put(StringUtils.fromString(REQUEST_LIMITS), getRequestLimit(config, currentModule));
+        return ValueCreator.createReadonlyRecordValue(currentModule, LISTENER_DETAIL, listenerRecord);
     }
 
     private static BMap<BString, Object> getRequestLimit(BMap<BString, Object> config, Module module) {
-        return ValueCreator.createReadonlyRecordValue(module, "RequestLimit",
-                (BMap<BString, Object>) config.getMapValue(StringUtils.fromString("requestLimits")));
-    }
-
-    public static BMap<BString, Object> getServiceListener(BObject listener, Module module) {
-        BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
-        listenerRecord.put(StringUtils.fromString("name"), StringUtils.fromString(LISTENER_NAMES_MAP.get(listener)));
-        listenerRecord.put(StringUtils.fromString("protocol"), getListenerProtocol(listener));
-        listenerRecord.put(StringUtils.fromString("port"), listener.get(StringUtils.fromString("port")));
-        return ValueCreator.createReadonlyRecordValue(module, "Listener", listenerRecord);
-    }
-
-    private static BString getListenerProtocol(BObject listener) {
-        BMap<BString, Object> config = (BMap<BString, Object>)
-                listener.get(StringUtils.fromString("inferredConfig"));
-        Object secureSocket = config.get(StringUtils.fromString("secureSocket"));
-        return StringUtils.fromString(secureSocket == null ? "HTTP" : "HTTPS");
+        return ValueCreator.createReadonlyRecordValue(module, REQUEST_LIMIT,
+                (BMap<BString, Object>) config.getMapValue(StringUtils.fromString(REQUEST_LIMITS)));
     }
 
 }

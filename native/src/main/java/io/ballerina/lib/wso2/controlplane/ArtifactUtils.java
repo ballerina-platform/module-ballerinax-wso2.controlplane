@@ -35,7 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENERS;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICES_RESOURCE;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -43,7 +45,8 @@ import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICES_
  * @since 1.0.0
  */
 public class ArtifactUtils {
-
+    private static final String SERVICE_PREFIX = "service_";
+    private static final String LISTENER_PREFIX = "listener_";
     static List<Artifact> artifacts;
     private static Module currentModule;
 
@@ -76,18 +79,18 @@ public class ArtifactUtils {
 
     private static void populateArtifactNamesMap() {
         for (Artifact artifact : artifacts) {
-            BObject serviceObj = (BObject) artifact.getDetail("service");
+            BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
             if (Utils.isControlPlaneService(serviceObj, currentModule)) {
                 continue;
             }
 
             if (!SERVICE_NAMES_MAP.containsKey(serviceObj)) {
-                SERVICE_NAMES_MAP.put(serviceObj, "service_" + serviceCounter++);
+                SERVICE_NAMES_MAP.put(serviceObj, SERVICE_PREFIX + serviceCounter++);
             }
-            List<BObject> listeners = (List<BObject>) artifact.getDetail("listeners");
+            List<BObject> listeners = (List<BObject>) artifact.getDetail(LISTENERS);
             for (BObject listener : listeners) {
                 if (!LISTENER_NAMES_MAP.containsKey(listener)) {
-                    LISTENER_NAMES_MAP.put(listener, "listener_" + listenerCounter++);
+                    LISTENER_NAMES_MAP.put(listener, LISTENER_PREFIX + listenerCounter++);
                 }
             }
         }
@@ -122,7 +125,7 @@ public class ArtifactUtils {
 
     private static Artifact getServiceArtifact(String name) {
         for (Artifact artifact : artifacts) {
-            BObject serviceObj = (BObject) artifact.getDetail("service");
+            BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
             if (name.equals(SERVICE_NAMES_MAP.get(serviceObj))) {
                 return artifact;
             }
