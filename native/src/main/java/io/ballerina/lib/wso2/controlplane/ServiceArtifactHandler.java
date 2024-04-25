@@ -36,9 +36,21 @@ import io.ballerina.runtime.api.values.BString;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.LISTENER_NAMES_MAP;
 import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.SERVICE_NAMES_MAP;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PATH_SEPARATOR;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.ATTACH_POINT;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BASE_PATH;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENER;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENERS;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.METHODS;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.NAME;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PACKAGE;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.RESOURCE;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.RESOURCES;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE_DETAIL;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE_RECORD;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SINGLE_SLASH;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.URL;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -50,27 +62,27 @@ public class ServiceArtifactHandler {
     public List<BListInitialValueEntry> getServiceList(Module currentModule) {
         List<BListInitialValueEntry> artifactEntries = new ArrayList<>();
         for (Artifact artifact : ArtifactUtils.artifacts) {
-            BObject serviceObj = (BObject) artifact.getDetail("service");
+            BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
             if (Utils.isControlPlaneService(serviceObj, currentModule)) {
                 continue;
             }
             BMap<BString, Object> service = ValueCreator.createMapValue();
-            service.put(StringUtils.fromString("name"), StringUtils.fromString(SERVICE_NAMES_MAP.get(serviceObj)));
-            service.put(StringUtils.fromString("basePath"), getAttachPointString(artifact));;
+            service.put(StringUtils.fromString(NAME), StringUtils.fromString(SERVICE_NAMES_MAP.get(serviceObj)));
+            service.put(StringUtils.fromString(BASE_PATH), getAttachPointString(artifact));
             artifactEntries.add(ValueCreator.createListInitialValueEntry(
-                    ValueCreator.createReadonlyRecordValue(currentModule, "Service", service)));
+                    ValueCreator.createReadonlyRecordValue(currentModule, SERVICE_RECORD, service)));
         }
         return artifactEntries;
     }
     public BMap<BString, Object> getDetailedService(Artifact artifact, Module currentModule) {
-        BObject serviceObj = (BObject) artifact.getDetail("service");
+        BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
         Type originalType = serviceObj.getOriginalType();
         BMap<BString, Object> service = ValueCreator.createMapValue();
-        service.put(StringUtils.fromString("package"), StringUtils.fromString(originalType.getPackage().toString()));
-        service.put(StringUtils.fromString("listeners"), getServiceListeners((List<BObject>)
-                artifact.getDetail("listeners"), currentModule));
-        service.put(StringUtils.fromString("resources"), getServiceResources(serviceObj, currentModule));
-        return ValueCreator.createReadonlyRecordValue(currentModule, "ServiceDetail", service);
+        service.put(StringUtils.fromString(PACKAGE), StringUtils.fromString(originalType.getPackage().toString()));
+        service.put(StringUtils.fromString(LISTENERS), getServiceListeners((List<BObject>)
+                artifact.getDetail(LISTENERS), currentModule));
+        service.put(StringUtils.fromString(RESOURCES), getServiceResources(serviceObj, currentModule));
+        return ValueCreator.createReadonlyRecordValue(currentModule, SERVICE_DETAIL, service);
     }
 
     private static Object getServiceResources(BObject serviceObj, Module currentModule) {
@@ -79,13 +91,13 @@ public class ServiceArtifactHandler {
         for (int i = 0; i < resourceMethods.length; i++) {
             ResourceMethodType resourceMethod = resourceMethods[i];
             BMap<BString, Object> resourceRecord = ValueCreator.createMapValue();
-            resourceRecord.put(StringUtils.fromString("methods"), getAccessorArray(resourceMethod));
-            resourceRecord.put(StringUtils.fromString("url"), getUrl(resourceMethod));
+            resourceRecord.put(StringUtils.fromString(METHODS), getAccessorArray(resourceMethod));
+            resourceRecord.put(StringUtils.fromString(URL), getUrl(resourceMethod));
             listenerEntries[i] = ValueCreator.createListInitialValueEntry(
-                    ValueCreator.createReadonlyRecordValue(currentModule, "Resource", resourceRecord));
+                    ValueCreator.createReadonlyRecordValue(currentModule, RESOURCE, resourceRecord));
         }
         ArrayType arrayType = TypeCreator.createArrayType(TypeUtils.getType(
-                ValueCreator.createRecordValue(currentModule, "Resource")), true);
+                ValueCreator.createRecordValue(currentModule, RESOURCE)), true);
         return ValueCreator.createArrayValue(arrayType, listenerEntries);
     }
 
@@ -117,12 +129,12 @@ public class ServiceArtifactHandler {
     }
 
     private static Object getAttachPointString(Artifact artifact) {
-        Object attachPoint = artifact.getDetail("attachPoint");
+        Object attachPoint = artifact.getDetail(ATTACH_POINT);
         if (TypeUtils.getType(attachPoint).getTag() == TypeTags.ARRAY_TAG) {
             BArray array = (BArray) attachPoint;
             StringBuilder attachPointStr = new StringBuilder();
             for (int i = 0; i < array.size(); i++) {
-                attachPointStr.append(PATH_SEPARATOR).append(array.getBString(i).getValue());
+                attachPointStr.append(SINGLE_SLASH).append(array.getBString(i).getValue());
             }
             return StringUtils.fromString(attachPointStr.toString());
         }
@@ -133,24 +145,11 @@ public class ServiceArtifactHandler {
         BListInitialValueEntry[] listenerEntries = new BListInitialValueEntry[listeners.size()];
         for (int i = 0; i < listeners.size(); i++) {
             BObject listener = listeners.get(i);
-            BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
-            listenerRecord.put(StringUtils.fromString("name"),
-                    StringUtils.fromString(LISTENER_NAMES_MAP.get(listener)));
-            listenerRecord.put(StringUtils.fromString("protocol"), getListenerProtocol(listener));
-            listenerRecord.put(StringUtils.fromString("port"), listener.get(StringUtils.fromString("port")));
-            listenerEntries[i] = ValueCreator.createListInitialValueEntry(
-                    ValueCreator.createReadonlyRecordValue(module, "Listener", listenerRecord));
+            listenerEntries[i] = ValueCreator.createListInitialValueEntry(Utils.getServiceListener(listener, module));
         }
         ArrayType arrayType = TypeCreator.createArrayType(TypeUtils.getType(
-                ValueCreator.createRecordValue(module, "Listener")), true);
+                ValueCreator.createRecordValue(module, LISTENER)), true);
         return ValueCreator.createArrayValue(arrayType, listenerEntries);
-    }
-
-    private BString getListenerProtocol(BObject listener) {
-        BMap<BString, Object> config = (BMap<BString, Object>)
-                listener.get(StringUtils.fromString("inferredConfig"));
-        Object secureSocket = config.get(StringUtils.fromString("secureSocket"));
-        return StringUtils.fromString(secureSocket == null ? "HTTP" : "HTTPS");
     }
 
 }
