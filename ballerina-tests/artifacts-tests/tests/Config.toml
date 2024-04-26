@@ -11,3 +11,7 @@ heartbeatInterval = 5
 groupId = "bal_dev"
 nodeId = "dev_node_3"
 mgtApiUrl ="https://localhost:9165/management/"
+
+[[ballerina.auth.users]]
+username="admin"
+password="admin"
