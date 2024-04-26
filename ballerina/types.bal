@@ -80,7 +80,6 @@ public type Resource record {
 public type Listener record {
     string name;
     string? protocol;
-    int port;
 };
 
 public type RequestLimit record {
@@ -91,10 +90,6 @@ public type RequestLimit record {
 
 public type ListenerDetail record {
     string package;
-    string httpVersion;
-    string host;
-    decimal timeout;
-    RequestLimit requestLimits;
 };
 
 public type Node record {
