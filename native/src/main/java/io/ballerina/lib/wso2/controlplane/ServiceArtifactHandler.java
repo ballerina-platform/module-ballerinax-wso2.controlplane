@@ -36,10 +36,11 @@ import io.ballerina.runtime.api.values.BString;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.LISTENER_NAMES_MAP;
 import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.SERVICE_NAMES_MAP;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.ARTIFACT;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.ATTACH_POINT;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BASE_PATH;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENER;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENERS;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.METHODS;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.NAME;
@@ -48,9 +49,9 @@ import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.RESOURCE;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.RESOURCES;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE_DETAIL;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE_RECORD;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SINGLE_SLASH;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.URL;
+import static io.ballerina.lib.wso2.controlplane.Utils.getArtifact;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -66,11 +67,8 @@ public class ServiceArtifactHandler {
             if (Utils.isControlPlaneService(serviceObj, currentModule)) {
                 continue;
             }
-            BMap<BString, Object> service = ValueCreator.createMapValue();
-            service.put(StringUtils.fromString(NAME), StringUtils.fromString(SERVICE_NAMES_MAP.get(serviceObj)));
-            service.put(StringUtils.fromString(BASE_PATH), getAttachPointString(artifact));
             artifactEntries.add(ValueCreator.createListInitialValueEntry(
-                    ValueCreator.createReadonlyRecordValue(currentModule, SERVICE_RECORD, service)));
+                    getArtifact(SERVICE_NAMES_MAP.get(serviceObj), currentModule)));
         }
         return artifactEntries;
     }
@@ -78,6 +76,8 @@ public class ServiceArtifactHandler {
         BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
         Type originalType = serviceObj.getOriginalType();
         BMap<BString, Object> service = ValueCreator.createMapValue();
+        service.put(StringUtils.fromString(NAME), StringUtils.fromString(SERVICE_NAMES_MAP.get(serviceObj)));
+        service.put(StringUtils.fromString(BASE_PATH), getAttachPointString(artifact));
         service.put(StringUtils.fromString(PACKAGE), StringUtils.fromString(originalType.getPackage().toString()));
         service.put(StringUtils.fromString(LISTENERS), getServiceListeners((List<BObject>)
                 artifact.getDetail(LISTENERS), currentModule));
@@ -145,10 +145,11 @@ public class ServiceArtifactHandler {
         BListInitialValueEntry[] listenerEntries = new BListInitialValueEntry[listeners.size()];
         for (int i = 0; i < listeners.size(); i++) {
             BObject listener = listeners.get(i);
-            listenerEntries[i] = ValueCreator.createListInitialValueEntry(Utils.getServiceListener(listener, module));
+            listenerEntries[i] = ValueCreator.createListInitialValueEntry(
+                    Utils.getArtifact(LISTENER_NAMES_MAP.get(listener), module));
         }
         ArrayType arrayType = TypeCreator.createArrayType(TypeUtils.getType(
-                ValueCreator.createRecordValue(module, LISTENER)), true);
+                ValueCreator.createRecordValue(module, ARTIFACT)), true);
         return ValueCreator.createArrayValue(arrayType, listenerEntries);
     }
 

@@ -57,29 +57,23 @@ public enum ArtifactType {
     LISTENER = "listeners"
 }
 
-public type Artifact Service|Listener;
+public type Artifact record {
+    string name;
+};
 
 public type ArtifactDetail ServiceDetail|ListenerDetail;
 
-public type Service record {
-    string name;
-    string? basePath;
-};
-
 public type ServiceDetail record {
+    *Artifact;
+    string? basePath;
     string package;
-    Listener[] listeners;
+    Artifact[] listeners;
     Resource[] resources;
 };
 
 public type Resource record {
     string[] methods;
     string url;
-};
-
-public type Listener record {
-    string name;
-    string? protocol;
 };
 
 public type RequestLimit record {
@@ -89,6 +83,8 @@ public type RequestLimit record {
 };
 
 public type ListenerDetail record {
+    *Artifact;
+    string? protocol;
     string package;
 };
 

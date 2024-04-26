@@ -26,22 +26,15 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
-import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.LISTENER_NAMES_MAP;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.ARTIFACT;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BALLERINA_HOME;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BAL_HOME;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BAL_VERSION;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.HTTP;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.HTTPS;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.INFERRED_CONFIG;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENER;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.NAME;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.NODE;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.OS_NAME;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.OS_VERSION;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PLATFORM_VERSION;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PORT;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PROTOCOL;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SECURE_SOCKET;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -78,18 +71,10 @@ public class Utils {
         return module != null && module.equals(currentModule);
     }
 
-    public static BMap<BString, Object> getServiceListener(BObject listener, Module module) {
-        BMap<BString, Object> listenerRecord = ValueCreator.createMapValue();
-        listenerRecord.put(StringUtils.fromString(NAME), StringUtils.fromString(LISTENER_NAMES_MAP.get(listener)));
-        listenerRecord.put(StringUtils.fromString(PROTOCOL), getListenerProtocol(listener));
-        listenerRecord.put(StringUtils.fromString(PORT), listener.get(StringUtils.fromString(PORT)));
-        return ValueCreator.createReadonlyRecordValue(module, LISTENER, listenerRecord);
+    public static BMap<BString, Object> getArtifact(String name, Module module) {
+        BMap<BString, Object> artifact = ValueCreator.createMapValue();
+        artifact.put(StringUtils.fromString(NAME), StringUtils.fromString(name));
+        return ValueCreator.createReadonlyRecordValue(module, ARTIFACT, artifact);
     }
 
-    private static BString getListenerProtocol(BObject listener) {
-        BMap<BString, Object> config = (BMap<BString, Object>)
-                listener.get(StringUtils.fromString(INFERRED_CONFIG));
-        Object secureSocket = config.get(StringUtils.fromString(SECURE_SOCKET));
-        return StringUtils.fromString(secureSocket == null ? HTTP : HTTPS);
-    }
 }

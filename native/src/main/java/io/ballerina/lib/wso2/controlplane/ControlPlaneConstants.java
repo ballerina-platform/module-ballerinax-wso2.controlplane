@@ -38,7 +38,7 @@ public class ControlPlaneConstants {
     public static final String BALLERINA = "ballerina";
     public static final String LISTENER = "Listener";
     public static final String RESOURCE = "Resource";
-    public static final String SERVICE_RECORD = "Service";
+    public static final String ARTIFACT = "Artifact";
     public static final String SERVICE_DETAIL = "ServiceDetail";
     public static final String LISTENER_DETAIL = "ListenerDetail";
     public static final String REQUEST_LIMIT = "RequestLimit";
