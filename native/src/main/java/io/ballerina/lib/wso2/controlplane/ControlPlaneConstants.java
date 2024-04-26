@@ -35,6 +35,7 @@ public class ControlPlaneConstants {
     public static final String HOST = "host";
     public static final String TIMEOUT = "timeout";
     public static final String REQUEST_LIMITS = "requestLimits";
+    public static final String BALLERINA = "ballerina";
     public static final String LISTENER = "Listener";
     public static final String RESOURCE = "Resource";
     public static final String SERVICE_RECORD = "Service";
