@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import ballerina/uuid;
 
 type IntegrationPlaneConnectionRequest record {
     string product = "bal";
@@ -38,12 +39,12 @@ type AccessTokenResponse record {|
 |};
 
 type DashBoard record {
-    string url = "";
+    string url;
     int heartbeatInterval = 10;
     decimal waitTimeForServicesInSeconds = 5;
-    string groupId = "";
-    string nodeId = "";
-    string mgtApiUrl = "";
+    string groupId;
+    string nodeId = uuid:createType4AsString();
+    string mgtApiUrl;
 };
 
 public type Artifacts record {
