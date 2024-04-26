@@ -72,6 +72,7 @@ public class ServiceArtifactHandler {
         }
         return artifactEntries;
     }
+
     public BMap<BString, Object> getDetailedService(Artifact artifact, Module currentModule) {
         BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
         Type originalType = serviceObj.getOriginalType();

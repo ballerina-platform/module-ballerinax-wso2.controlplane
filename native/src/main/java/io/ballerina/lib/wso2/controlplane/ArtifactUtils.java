@@ -52,13 +52,10 @@ public class ArtifactUtils {
     private static final String LISTENER_PREFIX = "listener_";
     static List<Artifact> artifacts;
     private static Module currentModule;
-
     private static final ServiceArtifactHandler serviceArtifactHandler = new ServiceArtifactHandler();
     private static final ListenerArtifactHandler listenerArtifactHandler = new ListenerArtifactHandler();
-
     static final Map<Object, String> SERVICE_NAMES_MAP = new HashMap<>();
     static final Map<Object, String> LISTENER_NAMES_MAP = new HashMap<>();
-
     private static int serviceCounter = 1;
     private static int listenerCounter = 1;
 
@@ -107,7 +104,6 @@ public class ArtifactUtils {
             if (Utils.isControlPlaneService(serviceObj, currentModule)) {
                 continue;
             }
-
             if (!SERVICE_NAMES_MAP.containsKey(serviceObj)) {
                 SERVICE_NAMES_MAP.put(serviceObj, SERVICE_PREFIX + serviceCounter++);
             }
@@ -128,7 +124,6 @@ public class ArtifactUtils {
                return ErrorCreator.createError(StringUtils.fromString("No service found with the name: " + name));
            }
            return serviceArtifactHandler.getDetailedService(artifact, currentModule);
-
         } else {
             BObject listenerObject = getListenerArtifact(value);
             if (listenerObject == null) {
