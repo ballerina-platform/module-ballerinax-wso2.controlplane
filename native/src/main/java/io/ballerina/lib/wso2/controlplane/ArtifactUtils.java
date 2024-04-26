@@ -31,10 +31,13 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BALLERINA;
+import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENER;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENERS;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICES_RESOURCE;
 import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE;
@@ -63,7 +66,7 @@ public class ArtifactUtils {
     }
 
     public static Object getArtifacts(Environment env, BString resourceType, BTypedesc typedesc) {
-        artifacts = env.getRepository().getArtifacts();
+        artifacts = filterHttpArtifacts(env.getRepository().getArtifacts());
         currentModule = env.getCurrentModule();
         populateArtifactNamesMap();
         Type artifactType = TypeUtils.getImpliedType(typedesc.getDescribingType());
@@ -75,6 +78,27 @@ public class ArtifactUtils {
         }
         ArrayType arrayType = TypeCreator.createArrayType(artifactType, true);
         return ValueCreator.createArrayValue(arrayType, artifactEntries.toArray(BListInitialValueEntry[]::new));
+    }
+
+    private static List<Artifact> filterHttpArtifacts(List<Artifact> artifacts) {
+        List<Artifact> httpArtifacts = new ArrayList<>();
+        for (Artifact artifact : artifacts) {
+            BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
+            if (Utils.isControlPlaneService(serviceObj, currentModule)) {
+                continue;
+            }
+            List<BObject> listeners = (List<BObject>) artifact.getDetail(LISTENERS);
+            for (BObject listener : listeners) {
+                Type listenerType = TypeUtils.getImpliedType(listener.getOriginalType());
+                Module typePackage = listenerType.getPackage();
+                if (listenerType.getName().equals(LISTENER) && typePackage.getOrg().equals(BALLERINA)
+                    && typePackage.getName().equals("http")) {
+                    httpArtifacts.add(artifact);
+                    break;
+                }
+            }
+        }
+        return httpArtifacts;
     }
 
     private static void populateArtifactNamesMap() {
