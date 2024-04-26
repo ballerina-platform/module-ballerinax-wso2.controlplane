@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.9.0-20240408-101100-fa2ff301"
+distribution-version = "2201.9.0-20240425-195200-d5ce8c72"
 
 [[package]]
 org = "ballerina"
@@ -41,7 +41,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "crypto"
-version = "2.5.0"
+version = "2.7.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
@@ -244,7 +244,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "observe"
-version = "1.2.2"
+version = "1.2.3"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -287,6 +287,20 @@ dependencies = [
 ]
 
 [[package]]
+org = "ballerina"
+name = "uuid"
+version = "1.8.0"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.int"},
+	{org = "ballerina", name = "time"}
+]
+modules = [
+	{org = "ballerina", packageName = "uuid", moduleName = "uuid"}
+]
+
+[[package]]
 org = "ballerinax"
 name = "wso2.controlplane"
 version = "1.0.0"
@@ -297,7 +311,8 @@ dependencies = [
 	{org = "ballerina", name = "jwt"},
 	{org = "ballerina", name = "lang.runtime"},
 	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "os"}
+	{org = "ballerina", name = "os"},
+	{org = "ballerina", name = "uuid"}
 ]
 modules = [
 	{org = "ballerinax", packageName = "wso2.controlplane", moduleName = "wso2.controlplane"}
