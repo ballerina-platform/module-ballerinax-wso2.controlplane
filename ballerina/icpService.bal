@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/auth;
 import ballerina/jballerina.java;
 
 listener http:Listener securedEP = new (icpServicePort,
@@ -25,10 +26,16 @@ listener http:Listener securedEP = new (icpServicePort,
         }
     }
 );
+http:FileUserStoreConfig config = {};
+http:ListenerFileUserStoreBasicAuthHandler handler = new (config);
 
 service /management on securedEP {
 
-    resource function get login() returns AccessTokenResponse|error {
+    resource function get login(@http:Header string Authorization) returns AccessTokenResponse|http:Unauthorized {
+        auth:UserDetails|http:Unauthorized authn = handler.authenticate(Authorization);
+        if authn is http:Unauthorized {
+            return authn;
+        }
         return {AccessToken: jwt};
     }
 

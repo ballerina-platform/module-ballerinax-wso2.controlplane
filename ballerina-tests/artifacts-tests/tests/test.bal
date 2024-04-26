@@ -13,13 +13,47 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/http;
 import ballerina/test;
 import ballerinax/wso2.controlplane as cp;
 
 configurable string testURL = ?;
 configurable int testPort = ?;
+
+@test:Config {}
+public function testLoginAuth() returns error? {
+    http:Client icpClient = check new (testURL,
+        secureSocket = {
+            enable: false
+        },
+        auth = {
+            username: "admin",
+            password: "admin"
+        }
+    );
+    http:Response result = check icpClient->/management/login();
+    test:assertEquals(result.statusCode, 200, "Invalid response received");
+    test:assertEquals(result.reasonPhrase, "OK", "Invalid response received");
+    json payload = check result.getJsonPayload();
+    test:assertFalse(payload.AccessToken is (), "Invalid json response received");
+}
+
+@test:Config {}
+public function testLoginAuthNegative() returns error? {
+    http:Client icpClient = check new (testURL,
+        secureSocket = {
+            enable: false
+        },
+        auth = {
+            username: "Non-admin",
+            password: "Non-admin"
+        }
+    );
+    http:Response result = check icpClient->/management/login();
+    test:assertEquals(result.statusCode, 401, "Invalid response received");
+    test:assertEquals(result.reasonPhrase, "Unauthorized", "Invalid response received");
+    test:assertEquals(result.getTextPayload(), "Username 'Non-admin' does not exists in file user store.", "Invalid response received");
+}
 
 @test:Config {}
 public function testGetBallerinaNode() returns error? {
@@ -68,7 +102,7 @@ service /hello on new http:Listener(testPort) {
         return "Hello, World!";
     }
 
-    resource function get albums/[string title]/[string user]/[string ...]() returns string|http:NotFound {
+    resource function get albums/[string title]/[string user]/[string...]() returns string|http:NotFound {
         return "Hello, World!";
-   }
+    }
 }

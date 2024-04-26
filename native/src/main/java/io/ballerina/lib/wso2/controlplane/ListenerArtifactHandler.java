@@ -49,8 +49,6 @@ import static io.ballerina.lib.wso2.controlplane.Utils.getServiceListener;
  * @since 1.0.0
  */
 public class ListenerArtifactHandler {
-    //TODO: HTTP Validation
-    //TODO: BASIC Auth Validation
     //TODO: NODE ID Generation
     public List<BListInitialValueEntry> getListenerList(Module currentModule) {
         List<BListInitialValueEntry> artifactEntries = new ArrayList<>();

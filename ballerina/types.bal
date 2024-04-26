@@ -38,12 +38,12 @@ type AccessTokenResponse record {|
 |};
 
 type DashBoard record {
-    string url = "";
+    string url;
     int heartbeatInterval = 10;
     decimal waitTimeForServicesInSeconds = 5;
-    string groupId = "";
-    string nodeId = "";
-    string mgtApiUrl = "";
+    string groupId;
+    string nodeId;
+    string mgtApiUrl;
 };
 
 public type Artifacts record {
