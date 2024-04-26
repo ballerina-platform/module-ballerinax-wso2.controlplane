@@ -49,7 +49,6 @@ import static io.ballerina.lib.wso2.controlplane.Utils.getServiceListener;
  * @since 1.0.0
  */
 public class ListenerArtifactHandler {
-    //TODO: NODE ID Generation
     public List<BListInitialValueEntry> getListenerList(Module currentModule) {
         List<BListInitialValueEntry> artifactEntries = new ArrayList<>();
         Set<BObject> listeners = getNonDuplicatedListeners(ArtifactUtils.artifacts, currentModule);
