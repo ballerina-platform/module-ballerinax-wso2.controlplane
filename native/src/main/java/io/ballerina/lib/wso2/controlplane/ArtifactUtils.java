@@ -50,7 +50,7 @@ import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE;
 public class ArtifactUtils {
     private static final String SERVICE_PREFIX = "service_";
     private static final String LISTENER_PREFIX = "listener_";
-    static List<Artifact> artifacts;
+    static volatile List<Artifact> artifacts;
     private static Module currentModule;
     private static final ServiceArtifactHandler serviceArtifactHandler = new ServiceArtifactHandler();
     private static final ListenerArtifactHandler listenerArtifactHandler = new ListenerArtifactHandler();
