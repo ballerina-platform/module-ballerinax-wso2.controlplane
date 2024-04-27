@@ -116,7 +116,12 @@ public class ArtifactUtils {
         }
     }
 
-    public static Object getDetailedArtifact(BString resourceType, BString name) {
+    public static Object getDetailedArtifact(Environment env, BString resourceType, BString name) {
+        if (artifacts == null) {
+            artifacts = filterHttpArtifacts(env.getRepository().getArtifacts());
+            currentModule = env.getCurrentModule();
+            populateArtifactNamesMap();
+        }
         String value = name.getValue();
         if (resourceType.getValue().equals(SERVICES_RESOURCE)) {
            Artifact artifact = getServiceArtifact(value);

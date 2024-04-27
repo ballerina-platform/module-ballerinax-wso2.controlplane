@@ -131,6 +131,9 @@ public class ServiceArtifactHandler {
 
     private static Object getAttachPointString(Artifact artifact) {
         Object attachPoint = artifact.getDetail(ATTACH_POINT);
+        if (attachPoint == null) {
+            return StringUtils.fromString(SINGLE_SLASH);
+        }
         if (TypeUtils.getType(attachPoint).getTag() == TypeTags.ARRAY_TAG) {
             BArray array = (BArray) attachPoint;
             StringBuilder attachPointStr = new StringBuilder();
