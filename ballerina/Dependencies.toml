@@ -303,7 +303,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "wso2.controlplane"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "file"},
 	{org = "ballerina", name = "http"},
