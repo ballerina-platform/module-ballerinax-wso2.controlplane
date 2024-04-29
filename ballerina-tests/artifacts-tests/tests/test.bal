@@ -28,24 +28,47 @@ public function testGetBallerinaNode() returns error? {
             enable: false
         }
     );
-    cp:Node|error node = icpClient->get("management");
+    cp:Node|error node = icpClient->/management();
     test:assertTrue(node is cp:Node, "Invalid response received");
 }
 
 @test:Config {}
-public function testGetBallerinaArtifacts() returns error? {
+public function testGetBallerinaServiceArtifacts() returns error? {
     http:Client rmClient = check new (testURL,
         secureSocket = {
             enable: false
         }
     );
-    cp:Artifacts|error artifacts = rmClient->get("management/Service");
+    cp:Artifacts|error artifacts = rmClient->/management/services();
     test:assertTrue(artifacts is cp:Artifacts, "Invalid response received");
     test:assertTrue(artifacts.count() == 1, "No services found");
+
+    cp:ArtifactDetail|error artifact = rmClient->/management/services(name = "service_1");
+    test:assertTrue(artifact is cp:ServiceDetail, "Invalid response received");
+}
+
+@test:Config {}
+public function testGetBallerinaListenerArtifacts() returns error? {
+    http:Client rmClient = check new (testURL,
+        secureSocket = {
+            enable: false
+        }
+    );
+    cp:Artifacts|error artifacts = rmClient->/management/listeners();
+    test:assertTrue(artifacts is cp:Artifacts, "Invalid response received");
+    test:assertTrue(artifacts.count() == 1, "No services found");
+
+    cp:ArtifactDetail|error artifact = rmClient->/management/listeners(name = "listener_1");
+    test:assertTrue(artifact is cp:ListenerDetail, "Invalid response received");
 }
 
 service /hello on new http:Listener(testPort) {
+
     resource function get greeting() returns string {
         return "Hello, World!";
     }
+
+    resource function get albums/[string title]/[string user]/[string ...]() returns string|http:NotFound {
+        return "Hello, World!";
+   }
 }

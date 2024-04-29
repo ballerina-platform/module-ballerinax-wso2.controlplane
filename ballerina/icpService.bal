@@ -36,22 +36,29 @@ service /management on securedEP {
         return check getBallerinaNode();
     }
 
-    resource function get [string resourceType](string? searchKey)
-                                            returns Artifacts|error {
-        Artifact[] artifacts = check getArtifacts(resourceType, searchKey, Artifact);
-        return {
-            count : artifacts.length(),
-            list : artifacts
-        };
+    resource function get [ArtifactType resourceType](string? name)
+                                            returns Artifacts|ArtifactDetail|error {
+        if (name == ()) {
+            Artifact[] artifacts = check getArtifacts(resourceType, Artifact);
+            return {
+                count: artifacts.length(),
+                list: artifacts
+            };
+        }
+        return getDetailedArtifact(resourceType, name);
     }
-
 }
 
 isolated function getBallerinaNode() returns Node|error = @java:Method {
     'class: "io.ballerina.lib.wso2.controlplane.Utils"
 } external;
 
-isolated function getArtifacts(string resourceType, string? searchKey, typedesc<anydata> t) returns Artifact[]|error =
+isolated function getDetailedArtifact(string resourceType, string name) returns ArtifactDetail|error =
 @java:Method {
-    'class: "io.ballerina.lib.wso2.controlplane.Utils"
+    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
+} external;
+
+isolated function getArtifacts(string resourceType, typedesc<anydata> t) returns Artifact[]|error =
+@java:Method {
+    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
 } external;

@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import ballerina/uuid;
 
 type IntegrationPlaneConnectionRequest record {
     string product = "bal";
@@ -38,12 +39,12 @@ type AccessTokenResponse record {|
 |};
 
 type DashBoard record {
-    string url = "";
+    string url;
     int heartbeatInterval = 10;
     decimal waitTimeForServicesInSeconds = 5;
-    string groupId = "";
-    string nodeId = "";
-    string mgtApiUrl = "";
+    string groupId;
+    string nodeId = uuid:createType4AsString();
+    string mgtApiUrl;
 };
 
 public type Artifacts record {
@@ -51,28 +52,43 @@ public type Artifacts record {
     Artifact[] list;
 };
 
-public type Artifact Service;
+public enum ArtifactType {
+    SERVICE = "services",
+    LISTENER = "listeners"
+}
 
-public type Service record {
+public type Artifact record {
     string name;
-    string? attachPoint;
-    Metadata metadata;
-    map<anydata> annotations;
 };
 
-public type Metadata record {
-    Listener[] listeners;
-    map<anydata> metadata;
+public type ArtifactDetail ServiceDetail|ListenerDetail;
+
+public type ServiceDetail record {
+    *Artifact;
+    string? basePath;
+    string package;
+    Artifact[] listeners;
+    Resource[] resources;
 };
 
-public type Listener record {
-    string 'type;
+public type Resource record {
+    string[] methods;
+    string url;
+};
+
+public type RequestLimit record {
+    int maxUriLength;
+    int maxHeaderSize;
+    int maxEntityBodySize;
+};
+
+public type ListenerDetail record {
+    *Artifact;
     string? protocol;
-    map<anydata> properties;
+    string package;
 };
 
 public type Node record {
-    string id;
     string platformName = "ballerina";
     string? platformVersion;
     string? ballerinaHome;
