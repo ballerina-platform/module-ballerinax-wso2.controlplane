@@ -36,21 +36,21 @@ import io.ballerina.runtime.api.values.BString;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.LISTENER_NAMES_MAP;
-import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.SERVICE_NAMES_MAP;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.ARTIFACT;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.ATTACH_POINT;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BASE_PATH;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENERS;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.METHODS;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.NAME;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PACKAGE;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.RESOURCE;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.RESOURCES;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE_DETAIL;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SINGLE_SLASH;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.URL;
+import static io.ballerina.lib.wso2.controlplane.Artifacts.LISTENER_NAMES_MAP;
+import static io.ballerina.lib.wso2.controlplane.Artifacts.SERVICE_NAMES_MAP;
+import static io.ballerina.lib.wso2.controlplane.Constants.ARTIFACT;
+import static io.ballerina.lib.wso2.controlplane.Constants.ATTACH_POINT;
+import static io.ballerina.lib.wso2.controlplane.Constants.BASE_PATH;
+import static io.ballerina.lib.wso2.controlplane.Constants.LISTENERS;
+import static io.ballerina.lib.wso2.controlplane.Constants.METHODS;
+import static io.ballerina.lib.wso2.controlplane.Constants.NAME;
+import static io.ballerina.lib.wso2.controlplane.Constants.PACKAGE;
+import static io.ballerina.lib.wso2.controlplane.Constants.RESOURCE;
+import static io.ballerina.lib.wso2.controlplane.Constants.RESOURCES;
+import static io.ballerina.lib.wso2.controlplane.Constants.SERVICE;
+import static io.ballerina.lib.wso2.controlplane.Constants.SERVICE_DETAIL;
+import static io.ballerina.lib.wso2.controlplane.Constants.SINGLE_SLASH;
+import static io.ballerina.lib.wso2.controlplane.Constants.URL;
 import static io.ballerina.lib.wso2.controlplane.Utils.getArtifact;
 
 /**
@@ -58,11 +58,11 @@ import static io.ballerina.lib.wso2.controlplane.Utils.getArtifact;
  *
  * @since 1.0.0
  */
-public class ServiceArtifactHandler {
+public class Services {
 
     public List<BListInitialValueEntry> getServiceList(Module currentModule) {
         List<BListInitialValueEntry> artifactEntries = new ArrayList<>();
-        for (Artifact artifact : ArtifactUtils.artifacts) {
+        for (Artifact artifact : Artifacts.artifacts) {
             BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
             if (Utils.isControlPlaneService(serviceObj, currentModule)) {
                 continue;
@@ -107,21 +107,21 @@ public class ServiceArtifactHandler {
         StringBuilder resourcePath = new StringBuilder();
         int count = 0;
         for (String segment : paths) {
-            resourcePath.append(ControlPlaneConstants.SINGLE_SLASH);
-            if (ControlPlaneConstants.PATH_PARAM_IDENTIFIER.equals(segment)) {
+            resourcePath.append(Constants.SINGLE_SLASH);
+            if (Constants.PATH_PARAM_IDENTIFIER.equals(segment)) {
                 String pathSegment = resourceMethod.getParamNames()[count++];
-                resourcePath.append(ControlPlaneConstants.OPEN_CURL_IDENTIFIER)
-                        .append(pathSegment).append(ControlPlaneConstants.CLOSE_CURL_IDENTIFIER);
-            } else if (ControlPlaneConstants.PATH_REST_PARAM_IDENTIFIER.equals(segment)) {
-                resourcePath.append(ControlPlaneConstants.STAR_IDENTIFIER);
-            } else if (ControlPlaneConstants.DOT_IDENTIFIER.equals(segment)) {
+                resourcePath.append(Constants.OPEN_CURL_IDENTIFIER)
+                        .append(pathSegment).append(Constants.CLOSE_CURL_IDENTIFIER);
+            } else if (Constants.PATH_REST_PARAM_IDENTIFIER.equals(segment)) {
+                resourcePath.append(Constants.STAR_IDENTIFIER);
+            } else if (Constants.DOT_IDENTIFIER.equals(segment)) {
                 break;
             } else {
                 resourcePath.append(segment);
             }
         }
-        return StringUtils.fromString(resourcePath.toString().replaceAll(ControlPlaneConstants.REGEX,
-                ControlPlaneConstants.SINGLE_SLASH));
+        return StringUtils.fromString(resourcePath.toString().replaceAll(Constants.REGEX,
+                Constants.SINGLE_SLASH));
     }
 
     private static BArray getAccessorArray(ResourceMethodType resourceMethod) {

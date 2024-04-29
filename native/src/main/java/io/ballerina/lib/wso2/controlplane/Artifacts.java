@@ -36,30 +36,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BALLERINA;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENER;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENERS;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICES_RESOURCE;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE;
+import static io.ballerina.lib.wso2.controlplane.Constants.BALLERINA;
+import static io.ballerina.lib.wso2.controlplane.Constants.LISTENER;
+import static io.ballerina.lib.wso2.controlplane.Constants.SERVICES_RESOURCE;
+import static io.ballerina.lib.wso2.controlplane.Constants.SERVICE;
 
 /**
  * Native function implementations of the wso2 control plane module.
  *
  * @since 1.0.0
  */
-public class ArtifactUtils {
+public class Artifacts {
     private static final String SERVICE_PREFIX = "service_";
     private static final String LISTENER_PREFIX = "listener_";
     static volatile List<Artifact> artifacts;
     private static Module currentModule;
-    private static final ServiceArtifactHandler serviceArtifactHandler = new ServiceArtifactHandler();
-    private static final ListenerArtifactHandler listenerArtifactHandler = new ListenerArtifactHandler();
+    private static final Services SERVICES = new Services();
+    private static final Listeners LISTENERS = new Listeners();
     static final Map<Object, String> SERVICE_NAMES_MAP = new HashMap<>();
     static final Map<Object, String> LISTENER_NAMES_MAP = new HashMap<>();
     private static int serviceCounter = 1;
     private static int listenerCounter = 1;
 
-    private ArtifactUtils() {
+    private Artifacts() {
     }
 
     public static Object getArtifacts(Environment env, BString resourceType, BTypedesc typedesc) {
@@ -69,9 +68,9 @@ public class ArtifactUtils {
         Type artifactType = TypeUtils.getImpliedType(typedesc.getDescribingType());
         List<BListInitialValueEntry> artifactEntries;
         if (resourceType.getValue().equals(SERVICES_RESOURCE)) {
-            artifactEntries =  serviceArtifactHandler.getServiceList(currentModule);
+            artifactEntries =  SERVICES.getServiceList(currentModule);
         } else {
-            artifactEntries = listenerArtifactHandler.getListenerList(currentModule);
+            artifactEntries = LISTENERS.getListenerList(currentModule);
         }
         ArrayType arrayType = TypeCreator.createArrayType(artifactType, true);
         return ValueCreator.createArrayValue(arrayType, artifactEntries.toArray(BListInitialValueEntry[]::new));
@@ -84,7 +83,7 @@ public class ArtifactUtils {
             if (Utils.isControlPlaneService(serviceObj, currentModule)) {
                 continue;
             }
-            List<BObject> listeners = (List<BObject>) artifact.getDetail(LISTENERS);
+            List<BObject> listeners = (List<BObject>) artifact.getDetail(Constants.LISTENERS);
             for (BObject listener : listeners) {
                 Type listenerType = TypeUtils.getImpliedType(listener.getOriginalType());
                 Module typePackage = listenerType.getPackage();
@@ -107,7 +106,7 @@ public class ArtifactUtils {
             if (!SERVICE_NAMES_MAP.containsKey(serviceObj)) {
                 SERVICE_NAMES_MAP.put(serviceObj, SERVICE_PREFIX + serviceCounter++);
             }
-            List<BObject> listeners = (List<BObject>) artifact.getDetail(LISTENERS);
+            List<BObject> listeners = (List<BObject>) artifact.getDetail(Constants.LISTENERS);
             for (BObject listener : listeners) {
                 if (!LISTENER_NAMES_MAP.containsKey(listener)) {
                     LISTENER_NAMES_MAP.put(listener, LISTENER_PREFIX + listenerCounter++);
@@ -128,13 +127,13 @@ public class ArtifactUtils {
            if (artifact == null) {
                return ErrorCreator.createError(StringUtils.fromString("No service found with the name: " + name));
            }
-           return serviceArtifactHandler.getDetailedService(artifact, currentModule);
+           return SERVICES.getDetailedService(artifact, currentModule);
         } else {
             BObject listenerObject = getListenerArtifact(value);
             if (listenerObject == null) {
                 return ErrorCreator.createError(StringUtils.fromString("No listener found with the name: " + name));
             }
-            return listenerArtifactHandler.getDetailedListener(listenerObject, currentModule);
+            return LISTENERS.getDetailedListener(listenerObject, currentModule);
         }
     }
 

@@ -1,6 +1,6 @@
 package io.ballerina.lib.wso2.controlplane;
 
-public class ControlPlaneConstants {
+public class Constants {
     public static final String BALLERINA_HOME = "ballerinaHome";
     public static final String PLATFORM_VERSION = "platformVersion";
     public static final String OS_VERSION = "osVersion";

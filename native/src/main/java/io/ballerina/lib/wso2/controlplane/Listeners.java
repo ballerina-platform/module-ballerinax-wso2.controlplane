@@ -31,23 +31,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.ballerina.lib.wso2.controlplane.ArtifactUtils.LISTENER_NAMES_MAP;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.HOST;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.HTTP;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.HTTPS;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.HTTP_VERSION;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.INFERRED_CONFIG;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENERS;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.LISTENER_DETAIL;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.NAME;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PACKAGE;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PORT;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PROTOCOL;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.REQUEST_LIMIT;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.REQUEST_LIMITS;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SECURE_SOCKET;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.SERVICE;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.TIMEOUT;
+import static io.ballerina.lib.wso2.controlplane.Artifacts.LISTENER_NAMES_MAP;
+import static io.ballerina.lib.wso2.controlplane.Constants.HOST;
+import static io.ballerina.lib.wso2.controlplane.Constants.HTTP;
+import static io.ballerina.lib.wso2.controlplane.Constants.HTTPS;
+import static io.ballerina.lib.wso2.controlplane.Constants.HTTP_VERSION;
+import static io.ballerina.lib.wso2.controlplane.Constants.INFERRED_CONFIG;
+import static io.ballerina.lib.wso2.controlplane.Constants.LISTENERS;
+import static io.ballerina.lib.wso2.controlplane.Constants.LISTENER_DETAIL;
+import static io.ballerina.lib.wso2.controlplane.Constants.NAME;
+import static io.ballerina.lib.wso2.controlplane.Constants.PACKAGE;
+import static io.ballerina.lib.wso2.controlplane.Constants.PORT;
+import static io.ballerina.lib.wso2.controlplane.Constants.PROTOCOL;
+import static io.ballerina.lib.wso2.controlplane.Constants.REQUEST_LIMIT;
+import static io.ballerina.lib.wso2.controlplane.Constants.REQUEST_LIMITS;
+import static io.ballerina.lib.wso2.controlplane.Constants.SECURE_SOCKET;
+import static io.ballerina.lib.wso2.controlplane.Constants.SERVICE;
+import static io.ballerina.lib.wso2.controlplane.Constants.TIMEOUT;
 import static io.ballerina.lib.wso2.controlplane.Utils.getArtifact;
 
 /**
@@ -55,10 +55,10 @@ import static io.ballerina.lib.wso2.controlplane.Utils.getArtifact;
  *
  * @since 1.0.0
  */
-public class ListenerArtifactHandler {
+public class Listeners {
     public List<BListInitialValueEntry> getListenerList(Module currentModule) {
         List<BListInitialValueEntry> artifactEntries = new ArrayList<>();
-        Set<BObject> listeners = getNonDuplicatedListeners(ArtifactUtils.artifacts, currentModule);
+        Set<BObject> listeners = getNonDuplicatedListeners(Artifacts.artifacts, currentModule);
         for (BObject listener : listeners) {
             artifactEntries.add(ValueCreator.createListInitialValueEntry(
                     getArtifact(LISTENER_NAMES_MAP.get(listener), currentModule)));

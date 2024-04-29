@@ -26,15 +26,15 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.ARTIFACT;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BALLERINA_HOME;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BAL_HOME;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.BAL_VERSION;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.NAME;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.NODE;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.OS_NAME;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.OS_VERSION;
-import static io.ballerina.lib.wso2.controlplane.ControlPlaneConstants.PLATFORM_VERSION;
+import static io.ballerina.lib.wso2.controlplane.Constants.ARTIFACT;
+import static io.ballerina.lib.wso2.controlplane.Constants.BALLERINA_HOME;
+import static io.ballerina.lib.wso2.controlplane.Constants.BAL_HOME;
+import static io.ballerina.lib.wso2.controlplane.Constants.BAL_VERSION;
+import static io.ballerina.lib.wso2.controlplane.Constants.NAME;
+import static io.ballerina.lib.wso2.controlplane.Constants.NODE;
+import static io.ballerina.lib.wso2.controlplane.Constants.OS_NAME;
+import static io.ballerina.lib.wso2.controlplane.Constants.OS_VERSION;
+import static io.ballerina.lib.wso2.controlplane.Constants.PLATFORM_VERSION;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -51,7 +51,7 @@ public class Utils {
                 StringUtils.fromString(getBallerinaVersionString((String) node.getDetail(BAL_VERSION))));
         nodeEntries.put(StringUtils.fromString(BALLERINA_HOME),
                 StringUtils.fromString((String) node.getDetail(BAL_HOME)));
-        nodeEntries.put(StringUtils.fromString(ControlPlaneConstants.OS_NAME),
+        nodeEntries.put(StringUtils.fromString(Constants.OS_NAME),
                 StringUtils.fromString((String) node.getDetail(OS_NAME)));
         nodeEntries.put(StringUtils.fromString(OS_VERSION),
                 StringUtils.fromString((String) node.getDetail(OS_VERSION)));

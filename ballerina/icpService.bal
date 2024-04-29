@@ -55,10 +55,10 @@ isolated function getBallerinaNode() returns Node|error = @java:Method {
 
 isolated function getDetailedArtifact(string resourceType, string name) returns ArtifactDetail|error =
 @java:Method {
-    'class: "io.ballerina.lib.wso2.controlplane.ArtifactUtils"
+    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
 } external;
 
 isolated function getArtifacts(string resourceType, typedesc<anydata> t) returns Artifact[]|error =
 @java:Method {
-    'class: "io.ballerina.lib.wso2.controlplane.ArtifactUtils"
+    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
 } external;
