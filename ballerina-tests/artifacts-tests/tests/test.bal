@@ -20,21 +20,45 @@ import ballerinax/wso2.controlplane as cp;
 
 configurable string testURL = ?;
 configurable int testPort = ?;
+string token = "";
 
-@test:Config {}
-public function testGetBallerinaNode() returns error? {
+@test:BeforeSuite
+function registerClient() returns error? {
     http:Client icpClient = check new (testURL,
+        auth = {
+            username: "admin",
+            password: "admin"
+        },
         secureSocket = {
             enable: false
         }
     );
-    cp:Node|error node = icpClient->/management();
+    record {
+        string AccessToken;
+    } result = check icpClient->/management/login();
+    token = result.AccessToken;
+}
+
+@test:Config {}
+public function testGetBallerinaNode() returns error? {
+    http:Client mngClient = check new (testURL,
+        auth = {
+            token: token
+        },
+        secureSocket = {
+            enable: false
+        }
+    );
+    cp:Node|error node = mngClient->/management();
     test:assertTrue(node is cp:Node, "Invalid response received");
 }
 
 @test:Config {}
 public function testGetBallerinaServiceArtifacts() returns error? {
     http:Client rmClient = check new (testURL,
+        auth = {
+            token: token
+        },
         secureSocket = {
             enable: false
         }
@@ -52,6 +76,9 @@ public function testGetBallerinaListenerArtifacts() returns error? {
     http:Client rmClient = check new (testURL,
         secureSocket = {
             enable: false
+        },
+        auth = {
+            token: token
         }
     );
     cp:Artifacts|error artifacts = rmClient->/management/listeners();
@@ -68,7 +95,7 @@ service /hello on new http:Listener(testPort) {
         return "Hello, World!";
     }
 
-    resource function get albums/[string title]/[string user]/[string ...]() returns string|http:NotFound {
+    resource function get albums/[string title]/[string user]/[string...]() returns string|http:NotFound {
         return "Hello, World!";
    }
 }
