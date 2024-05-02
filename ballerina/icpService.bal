@@ -32,7 +32,7 @@ service /management on securedEP {
     resource function get login(@http:Header string Authorization) returns AccessTokenResponse|error {
         boolean isValid = check authenticateRequest(Authorization);
         if (!isValid) {
-            return error("Invalid credentials provided");
+            return error http:ClientAuthError("Invalid credentials");
         }
         return {AccessToken: check generateJwtToken()};
     }

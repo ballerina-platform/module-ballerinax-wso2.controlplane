@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/lang.value;
 import ballerina/test;
 import ballerinax/wso2.controlplane as cp;
 
@@ -89,13 +90,69 @@ public function testGetBallerinaListenerArtifacts() returns error? {
     test:assertTrue(artifact is cp:ListenerDetail, "Invalid response received");
 }
 
-service /hello on new http:Listener(testPort) {
-
-    resource function get greeting() returns string {
-        return "Hello, World!";
+@test:Config {}
+function testNegativeRegisterClient() returns error? {
+    http:Client icpClient = check new (testURL,
+        auth = {
+            username: "Non-admin",
+            password: "Non-admin"
+        },
+        secureSocket = {
+            enable: false
+        }
+    );
+    anydata|error result = icpClient->/management/login();
+    test:assertTrue(result is error, "Invalid response received");
+    error e = <error>result;
+    map<value:Cloneable> & readonly detail = e.detail();
+    value:Cloneable & readonly unionResult = detail["body"];
+    test:assertTrue(unionResult is map<value:Cloneable>, "Invalid response received");
+    if (unionResult is map<value:Cloneable>) {
+        test:assertEquals(unionResult["message"], "Invalid credentials", "Invalid error message received");
     }
+    test:assertEquals(e.message(), "Internal Server Error", "Invalid error message received");
+}
 
-    resource function get albums/[string title]/[string user]/[string...]() returns string|http:NotFound {
-        return "Hello, World!";
-   }
+@test:Config {}
+function testNegativeInvalidTokenNode() returns error? {
+    http:Client rmClient = check new (testURL,
+        secureSocket = {
+            enable: false
+        },
+        auth = {
+            token: "Invalid-token"
+        }
+    );
+    cp:Node|error node = rmClient->/management();
+    test:assertTrue(node is error, "Invalid response received");
+    error e = <error>node;
+    map<value:Cloneable> & readonly detail = e.detail();
+    value:Cloneable & readonly unionResult = detail["body"];
+    test:assertTrue(unionResult is map<value:Cloneable>, "Invalid response received");
+    if (unionResult is map<value:Cloneable>) {
+        test:assertEquals(unionResult["message"], "Invalid JWT.", "Invalid error message received");
+    }
+    test:assertEquals(e.message(), "Internal Server Error", "Invalid error message received");
+}
+
+@test:Config {}
+function testNegativeInvalidTokenArtifacts() returns error? {
+    http:Client rmClient = check new (testURL,
+        secureSocket = {
+            enable: false
+        },
+        auth = {
+            token: "Invalid-token"
+        }
+    );
+    cp:Artifacts|error node = rmClient->/management/services();
+    test:assertTrue(node is error, "Invalid response received");
+    error e = <error>node;
+    map<value:Cloneable> & readonly detail = e.detail();
+    value:Cloneable & readonly unionResult = detail["body"];
+    test:assertTrue(unionResult is map<value:Cloneable>, "Invalid response received");
+    if (unionResult is map<value:Cloneable>) {
+        test:assertEquals(unionResult["message"], "Invalid JWT.", "Invalid error message received");
+    }
+    test:assertEquals(e.message(), "Internal Server Error", "Invalid error message received");
 }
