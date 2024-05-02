@@ -1,11 +1,27 @@
+// Copyright (c) 2024, WSO2 LLC. (https://www.wso2.com).
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/jwt;
 import ballerina/lang.array;
 
-string issuer = string `https://localhost:${icpServicePort}/`;
+final string issuer = string `https://localhost:${icpServicePort}/`;
 
 string|error jwt = generateJwtToken();
 
-function generateJwtToken() returns string|error {
+isolated function generateJwtToken() returns string|error {
     jwt:IssuerConfig issuerConfig = {
         issuer: issuer,
         audience: "ballerina",
@@ -25,7 +41,7 @@ function generateJwtToken() returns string|error {
     return jwt:issue(issuerConfig);
 }
 
-jwt:ValidatorConfig validatorConfig = {
+final jwt:ValidatorConfig & readonly validatorConfig = {
     issuer: issuer,
     audience: "ballerina",
     username: "admin",
@@ -37,7 +53,7 @@ jwt:ValidatorConfig validatorConfig = {
     }
 };
 
-function authenticateRequest(string credential) returns boolean|error {
+isolated function authenticateRequest(string credential) returns boolean|error {
     [string, string] [username, password] = check extractUsernameAndPassword(extractCredential(credential));
     if (username == dashboard.serviceAccount && password == dashboard.serviceAccountPassword) {
         return true;
@@ -45,7 +61,7 @@ function authenticateRequest(string credential) returns boolean|error {
     return false;
 }
 
-function extractUsernameAndPassword(string credential) returns [string, string]|error {
+isolated function extractUsernameAndPassword(string credential) returns [string, string]|error {
     byte[]|error base64Decoded = 'array:fromBase64(credential);
     if base64Decoded is byte[] {
         string|error base64DecodedResults = 'string:fromBytes(base64Decoded);
@@ -66,6 +82,6 @@ function extractUsernameAndPassword(string credential) returns [string, string]|
 
 }
 
-function extractCredential(string data) returns string {
+isolated function extractCredential(string data) returns string {
     return re `\s`.split(data)[1];
 }

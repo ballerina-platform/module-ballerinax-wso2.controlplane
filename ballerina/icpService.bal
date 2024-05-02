@@ -29,7 +29,7 @@ listener http:Listener securedEP = new (icpServicePort,
 
 service /management on securedEP {
 
-    resource function get login(@http:Header string Authorization) returns AccessTokenResponse|error {
+    isolated resource function get login(@http:Header string Authorization) returns AccessTokenResponse|error {
         boolean isValid = check authenticateRequest(Authorization);
         if (!isValid) {
             return error http:ClientAuthError("Invalid credentials");
@@ -37,12 +37,12 @@ service /management on securedEP {
         return {AccessToken: check generateJwtToken()};
     }
 
-    resource function get .(@http:Header string Authorization) returns Node|error {
+    isolated resource function get .(@http:Header string Authorization) returns Node|error {
         _ = check jwt:validate(extractCredential(Authorization), validatorConfig);
         return check getBallerinaNode();
     }
 
-    resource function get [ArtifactType resourceType](string? name, @http:Header string Authorization)
+    isolated resource function get [ArtifactType resourceType](string? name, @http:Header string Authorization)
                                             returns Artifacts|ArtifactDetail|error {
         _ = check jwt:validate(extractCredential(Authorization), validatorConfig);
         if (name == ()) {
