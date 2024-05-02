@@ -45,6 +45,8 @@ type DashBoard record {
     string groupId;
     string nodeId = uuid:createType4AsString();
     string mgtApiUrl;
+    string serviceAccount;
+    string serviceAccountPassword;
 };
 
 public type Artifacts record {
