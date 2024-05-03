@@ -3,6 +3,7 @@ testPort = 9090
 
 [ballerinax.wso2.controlplane]
 keyStorePath = "../resources/certsandkeys/ballerinaKeystore.p12"
+trustStorePath = "../resources/certsandkeys/ballerinaTruststore.p12"
 icpServicePort = 9165
 
 [ballerinax.wso2.controlplane.dashboard]
@@ -11,3 +12,5 @@ heartbeatInterval = 5
 groupId = "bal_dev"
 nodeId = "dev_node_3"
 mgtApiUrl ="https://localhost:9165/management/"
+serviceAccount = "admin"
+serviceAccountPassword = "admin"

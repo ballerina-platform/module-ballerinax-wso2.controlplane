@@ -20,9 +20,17 @@ import ballerina/os;
 configurable DashBoard dashboard = ?;
 configurable string keyStorePath = check getDefaultKeyStore();
 configurable string keyStorePassword = "ballerina";
+configurable string trustStorePath = check getDefaultTrustStore();
+configurable string trustStorePassword = "ballerina";
+
+function getDefaultTrustStore() returns string|error {
+    string trustStorePath = check file:joinPath(os:getEnv("BALLERINA_HOME"), "bre", "security", "ballerinaTruststore.p12");
+    return trustStorePath;
+}
+
 configurable int icpServicePort = 9164;
 
-function getDefaultKeyStore() returns error|string {
+function getDefaultKeyStore() returns string|error {
     string keyStorePath = check file:joinPath(os:getEnv("BALLERINA_HOME"), "bre", "security", "ballerinaKeystore.p12");
     return keyStorePath;
 }

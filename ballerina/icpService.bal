@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/jballerina.java;
+import ballerina/jwt;
 
 listener http:Listener securedEP = new (icpServicePort,
     secureSocket = {
@@ -28,16 +29,22 @@ listener http:Listener securedEP = new (icpServicePort,
 
 service /management on securedEP {
 
-    resource function get login() returns AccessTokenResponse|error {
-        return {AccessToken: jwt};
+    isolated resource function get login(@http:Header string Authorization) returns AccessTokenResponse|error {
+        boolean isValid = check authenticateRequest(Authorization);
+        if (!isValid) {
+            return error http:ClientAuthError("Invalid credentials");
+        }
+        return {AccessToken: check generateJwtToken()};
     }
 
-    resource function get .() returns Node|error {
+    isolated resource function get .(@http:Header string Authorization) returns Node|error {
+        _ = check jwt:validate(extractCredential(Authorization), validatorConfig);
         return check getBallerinaNode();
     }
 
-    resource function get [ArtifactType resourceType](string? name)
+    isolated resource function get [ArtifactType resourceType](string? name, @http:Header string Authorization)
                                             returns Artifacts|ArtifactDetail|error {
+        _ = check jwt:validate(extractCredential(Authorization), validatorConfig);
         if (name == ()) {
             Artifact[] artifacts = check getArtifacts(resourceType, Artifact);
             return {
