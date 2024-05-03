@@ -46,8 +46,8 @@ type DashBoard record {
     string groupId;
     string nodeId = uuid:createType4AsString();
     string mgtApiUrl;
-    string serviceAccount;
-    string serviceAccountPassword;
+    string serviceAccount = "bal_admin";
+    string serviceAccountPassword = "bal_secret";
 };
 
 # Represents a list of artifacts in a Ballerina node.
