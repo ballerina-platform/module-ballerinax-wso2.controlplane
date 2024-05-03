@@ -77,7 +77,7 @@ public function testGetBallerinaServiceArtifacts() returns error? {
         test:assertEquals(artifact.basePath, "/hello", "Invalid service basePath received");
         test:assertEquals(artifact.package, "ballerinax/artifacts_tests:0", "Invalid service package received");
         test:assertEquals(artifact.listeners.toString(), string `[{"name":"listener_1"}]`, "Invalid service listener received");
-        test:assertEquals(artifact.resources.toString(), string `[{"methods":["get"],"url":"/greeting"},{"methods":["get"],"url":"/albums/{title}/{user}/*"}]`, "Invalid service resources received");
+        test:assertEquals(artifact.resources.toString(), string `[{"methods":["get"],"url":"/greeting"},{"methods":["get"],"url":"/albums/{title}/{artist}/*"}]`, "Invalid service resources received");
     }
 }
 
