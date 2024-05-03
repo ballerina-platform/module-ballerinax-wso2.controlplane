@@ -28,7 +28,7 @@ function getDefaultTrustStore() returns string|error {
     return trustStorePath;
 }
 
-configurable int icpServicePort = 9164;
+configurable int icpServicePort = 9264;
 
 function getDefaultKeyStore() returns string|error {
     string keyStorePath = check file:joinPath(os:getEnv("BALLERINA_HOME"), "bre", "security", "ballerinaKeystore.p12");
