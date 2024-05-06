@@ -39,6 +39,7 @@ def packageOrg = "ballerinax"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
+def ballerinaCentralAccessToken = System.getenv('BALLERINA_CENTRAL_ACCESS_TOKEN')
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -87,6 +88,22 @@ task commitTomlFiles {
     }
 }
 
+task ballerinaPublish {
+
+    doLast {
+        if (project.version.toString().split("-").length > 1) {
+            return
+        }
+        if (ballerinaCentralAccessToken != null) {
+            println("Publishing to the ballerina central...")
+            def env = "JAVA_OPTS -DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+            executeBalCommand ("push", "${project.projectDir}", env)
+        } else {
+            throw new InvalidUserDataException("Central Access Token is not present")
+        }
+    }
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
@@ -108,6 +125,10 @@ publishing {
 
 clean {
     delete 'build'
+}
+
+publish {
+    dependsOn "ballerinaPublish"
 }
 
 updateTomlFiles.dependsOn copyStdlibs
