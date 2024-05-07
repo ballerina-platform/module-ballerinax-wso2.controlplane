@@ -6,6 +6,30 @@
 
 This repository is for adding Ballerina support with WSO2 Integration Control Plane.
 
+## Adding control plane support to a Ballerina project with services
+
+1. Add `import ballerinax/wso2.controlplane as _;` to the default module.
+2. Add `remoteManagement=true` to `[build-options]` section of the Ballerina.toml file.
+3. Create Config.toml file if it does not exist, and add the following configurations.
+    ```toml
+    [ballerinax.wso2.controlplane]
+    # keyStorePath = "../keystore.p12"
+    # trustStorePath = "../truststore.p12"
+    # icpServicePort = 9264
+
+    [ballerinax.wso2.controlplane.dashboard]
+    url = "https://localhost:9743/dashboard/api"
+    heartbeatInterval = 10
+    groupId = "cluster1"
+    mgtApiUrl ="https://localhost:9264/management/"
+    # nodeId = "node1"
+    # serviceAccount = "bal_admin"
+    # serviceAccountPassword = "bal_secret"
+    ```
+    Modify the configurations to match your integration control plane dashboard.
+
+    If there are multiple nodes in the same machine, make sure to pick a unique icpServicePort (same in mgtApiUrl) for each node.
+
 ## Building from the Source
 
 ### Setting Up the Prerequisites
