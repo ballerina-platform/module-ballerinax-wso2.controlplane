@@ -1,0 +1,10 @@
+[package]
+org = "ballerinax"
+name = "artifacts_tests"
+version = "1.0.1"
+
+[platform.java21]
+graalvmCompatible = true
+
+[build-options]
+remoteManagement=true
