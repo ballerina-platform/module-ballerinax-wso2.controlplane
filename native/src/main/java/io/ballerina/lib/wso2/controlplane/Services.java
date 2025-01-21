@@ -16,15 +16,15 @@
 
 package io.ballerina.lib.wso2.controlplane;
 
-import io.ballerina.runtime.api.Artifact;
 import io.ballerina.runtime.api.Module;
-import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.repository.Artifact;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.NetworkObjectType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;

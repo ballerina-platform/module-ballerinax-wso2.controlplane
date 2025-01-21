@@ -16,9 +16,9 @@
 
 package io.ballerina.lib.wso2.controlplane;
 
-import io.ballerina.runtime.api.Artifact;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.repository.Artifact;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BListInitialValueEntry;
