@@ -88,6 +88,23 @@ task commitTomlFiles {
     }
 }
 
+def executeBalCommand(String command, String dir, env = "") {
+    try {
+        exec {
+            workingDir dir
+            environment environment: env
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "bal.bat ${command} && exit %%ERRORLEVEL%%"
+            } else {
+                commandLine 'sh', '-c', "bal ${command}"
+            }
+        }
+    } catch (Exception e) {
+        println("bal command failed. " + e.message)
+        throw e
+    }
+}
+
 task ballerinaPublish {
 
     doLast {
