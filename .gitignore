@@ -37,3 +37,6 @@ target
 # Ballerina
 velocity.log*
 *Ballerina.lock
+
+# exclude the distribution donwloaded when setting up Ballerina during workflows
+*.deb
