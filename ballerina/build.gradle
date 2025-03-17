@@ -94,9 +94,9 @@ def executeBalCommand(String command, String dir, env = "") {
             workingDir dir
             environment environment: env
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "bal.bat ${command} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "bal.bat ${command} ballerinax-wso2.controlplane-java21-${project.version}.bala && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "bal ${command}"
+                commandLine 'sh', '-c', "bal ${command}", "./ballerinax-wso2.controlplane-java21-${project.version}.bala"
             }
         }
     } catch (Exception e) {
@@ -114,7 +114,7 @@ task ballerinaPublish {
         if (ballerinaCentralAccessToken != null) {
             println("Publishing to the ballerina central... ${project.projectDir}")
             def env = "JAVA_OPTS -DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-            executeBalCommand ("push", "${project.projectDir}/build/bal_build_target/bala/ballerinax-wso2.controlplane-java21-${project.version}.bala", env)
+            executeBalCommand ("push", "${project.projectDir}/build/bal_build_target/bala/", env)
         } else {
             throw new InvalidUserDataException("Central Access Token is not present")
         }
