@@ -1,7 +1,7 @@
 [package]
 org = "ballerinax"
 name = "artifacts_tests"
-version = "1.0.1"
+version = "1.1.0"
 
 [platform.java21]
 graalvmCompatible = true
