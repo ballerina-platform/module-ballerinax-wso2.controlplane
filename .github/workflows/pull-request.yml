@@ -1,60 +1,14 @@
-name: Validate Pull Request
+name: PR Build
 
-on:
-  pull_request:
-    branches:
-      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+on: pull_request
 
 jobs:
-  ubuntu-build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: adopt
-          java-version: 21.0.3
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Set Docker Host env variable
-        run: echo "DOCKER_HOST=$(docker context ls --format '{{print .DockerEndpoint}}' | tr -d '\n')" >> $GITHUB_ENV
-      - name: Build with Gradle
-        env:
-          packageUser: ${{ github.actor }}
-          packagePAT: ${{ secrets.GITHUB_TOKEN }}
-        run: | 
-          ./gradlew clean build --stacktrace --scan --console=plain --no-daemon
-      - name: Generate CodeCov Report
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-  windows-build:
-    name: Build on Windows
-    runs-on: windows-latest
-    env:
-      packageUser: ${{ github.actor }}
-      packagePAT: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: 21.0.3
-      - uses: graalvm/setup-graalvm@v1
-        with:
-          java-version: '21.0.1'
-          distribution: 'graalvm-community'
-          components: 'native-image'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          set-java-home: 'false'
-      - name: Build with Gradle
-        env:
-          packageUser: ${{ github.actor }}
-          packagePAT: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./gradlew.bat build -PnativeTest --no-daemon
+  call_workflow:
+    name: Run PR Build Workflow
+    if: ${{ github.repository_owner == 'ballerina-platform' }}
+    uses: ballerina-platform/ballerina-library/.github/workflows/pr-build-connector-template.yml@main
+    secrets: inherit
