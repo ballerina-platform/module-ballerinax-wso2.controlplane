@@ -29,14 +29,14 @@ ext.ballerinaTomlParserVersion = project.ballerinaTomlParserVersion
 ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 
 allprojects {
-    group = 'org.ballerinalang'
+    group = project.group
     version = project.version
 
+    apply plugin: 'jacoco'
     apply plugin: 'maven-publish'
 
     repositories {
         mavenLocal()
-
         maven {
             url = 'https://maven.wso2.org/nexus/content/repositories/releases/'
         }
@@ -63,6 +63,8 @@ allprojects {
         timestampedVersionRegex = '.*-\\d{8}-\\d{6}-\\w.*\$'
     }
 }
+
+def moduleVersion = project.version.replace("-SNAPSHOT", "")
 
 subprojects {
     configurations {
@@ -100,15 +102,11 @@ subprojects {
     }
 }
 
-def moduleVersion = project.version
-if (moduleVersion.indexOf('-') != -1) {
-    moduleVersion = moduleVersion.substring(0, moduleVersion.indexOf('-'))
-}
-
 release {
     failOnPublishNeeded = false
 
-    buildTasks = ['build']
+    buildTasks = ["build"]
+    failOnSnapshotDependencies = true
     versionPropertyFile = 'gradle.properties'
     tagTemplate = 'v$version'
 
