@@ -26,13 +26,13 @@ def packageName = "wso2.controlplane"
 def packageOrg = "ballerinax"
 
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+def ballerinaLangVersion = project.ext.ballerinaLangVersion
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
-def ballerinaCentralAccessToken = System.getenv('BALLERINA_CENTRAL_ACCESS_TOKEN')
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
-        def splitVersion = extVersion.split('-');
+        def splitVersion = extVersion.split('-')
         if (splitVersion.length > 3) {
             def strippedValues = splitVersion[0..-4]
             return strippedValues.join('-')
@@ -48,20 +48,14 @@ ballerina {
     packageOrganization = packageOrg
     module = packageName
     langVersion = ballerinaLangVersion
-    testCoverageParam = "--code-coverage --coverage-format=xml"
-    packageOrganization = packageOrg
-    platform = "java21"
     isConnector = true
-}
-
-configurations {
-    externalJars
 }
 
 task updateTomlFiles {
     doLast {
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
+        newConfig = newConfig.replace("@ballerina.version@", ballerinaLangVersion)
         ballerinaTomlFile.text = newConfig
     }
 }

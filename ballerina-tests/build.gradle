@@ -29,15 +29,13 @@ def packageOrg = "ballerina"
 def moduleName = "tests"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/BallerinaTest.toml")
-def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
-def distributionBinPath =  "${ballerinaDist}/bin"
-def testCoverageParam = "--code-coverage --coverage-format=xml --includes=io.ballerina.wso2.controlplane.*:ballerina." +
+def testCoverageParams = "--code-coverage --coverage-format=xml --includes=io.ballerina.wso2.controlplane.*:ballerina." +
         "wso2.controlplane*"
 def testPackages = ["artifacts-tests"]
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
-        def splitVersion = extVersion.split('-');
+        def splitVersion = extVersion.split('-')
         if (splitVersion.length > 3) {
             def strippedValues = splitVersion[0..-4]
             return strippedValues.join('-')
@@ -47,17 +45,6 @@ def stripBallerinaExtensionVersion(String extVersion) {
     } else {
         return extVersion.replace("${project.ext.snapshotVersion}", "")
     }
-}
-
-configurations {
-    jbalTools
-}
-
-dependencies {
-    jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
-        transitive = false
-    }
-    implementation group: 'org.ballerinalang', name: 'toml-parser', version: "${ballerinaTomlParserVersion}"
 }
 
 clean {
@@ -87,7 +74,7 @@ task updateTomlVersions {
 
 task commitTomlFiles {
     doLast {
-        def files = " ";
+        def files = " "
         testPackages.each{ testPackage ->
             files += "${testPackage}/Ballerina.toml ${testPackage}/Dependencies.toml "
         }
@@ -112,6 +99,9 @@ def testParams = ""
 def graalvmFlag = ""
 def parallelTestFlag = ""
 def skipTests = false
+def ballerinaDockerTag = ""
+def projectDirectory = new File("$project.projectDir")
+def parentDirectory = new File("$projectDirectory.parent")
 
 task initializeVariables {
     if (project.hasProperty("groups")) {
@@ -140,15 +130,55 @@ task initializeVariables {
             testPackages.remove(testPackage)
         }
     }
+    ballerinaDockerTag = getDockerImageTag(project)
+    println("[Info] project builds on docker")
+    println("[Info] using the Ballerina docker image tag: $ballerinaDockerTag")
 
     gradle.taskGraph.whenReady { graph ->
         if (graph.hasTask(":${packageName}-ballerina-tests:test")) {
             if (!project.hasProperty('balGraalVMTest')) {
-                testParams = "${testCoverageParam}"
+                testParams = "${testCoverageParams}"
             }
         } else {
             skipTests = true
         }
+    }
+}
+
+static String getDockerImageTag(Project project) {
+    def ballerinaDockerTag = project.findProperty('ballerinaLangVersion')
+    if (project.hasProperty('buildUsingDocker')) {
+        ballerinaDockerTag = project.findProperty('buildUsingDocker')
+        if (ballerinaDockerTag == '') {
+            return 'nightly'
+        }
+    }
+    if (isTimeStampVersion(ballerinaDockerTag as String)) {
+        return 'nightly'
+    }
+    return ballerinaDockerTag
+}
+
+static boolean isTimeStampVersion(String version) {
+    return version.trim().split("-").length > 1
+}
+
+static void createDockerEnvFile(String dockerEnvFilePath) {
+    def dockerEnvFileWriter = new PrintWriter("$dockerEnvFilePath", "UTF-8")
+    def excludedVariables = ["PATH", "JAVA_HOME", "HOME"]
+    def envVariables = System.getenv()
+    envVariables.each { key, value ->
+        if (!excludedVariables.contains(key) && !key.startsWith("=")) {
+            dockerEnvFileWriter.println("$key=$value")
+        }
+    }
+    dockerEnvFileWriter.close()
+}
+
+static void deleteFile(String filePath) {
+    def file = new File(filePath)
+    if (file.exists() && !file.delete()) {
+        println("Failed to delete $filePath.")
     }
 }
 
@@ -170,26 +200,25 @@ task ballerinaTest {
                 exec {
                     workingDir "${project.projectDir}/${testPackage}"
                     environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+                    createDockerEnvFile("$project.projectDir/$testPackage/docker.env")
                     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                        commandLine 'cmd', '/c', "${balJavaDebugParam} ${distributionBinPath}/bal.bat test ${graalvmFlag}" +
-                                " ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${windowsDisableGroups}" +
-                                "  ${debugParams} && exit %%ERRORLEVEL%%"
+                        disableGroups = disableGroups + windowsDisableGroups
+                    }
+                    def balTestWithDocker = """
+                            docker run --env-file $project.projectDir/$testPackage/docker.env --rm --net=host -u root \
+                                -v $parentDirectory:/home/ballerina/$parentDirectory.name \
+                                -v $projectDirectory/$testPackage:/home/ballerina/$parentDirectory.name/$projectDirectory.name/$testPackage \
+                                ballerina/ballerina:$ballerinaDockerTag \
+                                /bin/sh -c "cd $parentDirectory.name/$projectDirectory.name/$testPackage && \
+                                $balJavaDebugParam bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
+                        """
+                    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                        commandLine 'cmd', '/c', "$balTestWithDocker && exit %%ERRORLEVEL%%"
                     } else {
-                        commandLine 'sh', '-c', "${balJavaDebugParam} ${distributionBinPath}/bal test ${graalvmFlag} ${parallelTestFlag} ${testParams}" +
-                                " ${groupParams} ${disableGroups} ${debugParams}"
+                        commandLine 'sh', '-c', "$balTestWithDocker"
                     }
                 }
-                if (project.hasProperty('balGraalVMTest')) {
-                    exec {
-                        workingDir "${project.projectDir}/${testPackage}"
-                        environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine 'cmd', '/c', "${distributionBinPath}/bal.bat clean"
-                        } else {
-                            commandLine 'sh', '-c', "${distributionBinPath}/bal clean"
-                        }
-                    }
-                }
+                deleteFile("$project.projectDir/$testPackage/docker.env")
             }
         }
     }
