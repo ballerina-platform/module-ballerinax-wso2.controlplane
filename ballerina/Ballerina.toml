@@ -2,7 +2,7 @@
 org = "ballerinax"
 name = "wso2.controlplane"
 version = "1.1.0"
-distribution = "2201.11.0-20241218-101200-109f6cc7"
+distribution = "2201.12.2"
 repository = "https://github.com/ballerina-platform/module-ballerinax-wso2.controlplane"
 license = ["Apache-2.0"]
 
@@ -10,4 +10,4 @@ license = ["Apache-2.0"]
 graalvmCompatible = true
 
 [[platform.java21.dependency]]
-path = "../native/build/libs/wso2.controlplane-native-1.1.0.jar"
+path = "../native/build/libs/wso2.controlplane-native-1.1.0-SNAPSHOT.jar"
