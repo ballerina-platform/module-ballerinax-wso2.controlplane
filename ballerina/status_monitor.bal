@@ -1,10 +1,74 @@
-public type IntegrationStatus record {|
-    Artifact[] artifacts;
-    Node node;
-|};
+// Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
-public function getCurrentIntegrations() returns IntegrationStatus|error {
-    // Implementation to get current integration statuses
-    Artifact[] allArtifacts = [...check getArtifacts("services", Artifact), ...check getArtifacts("listeners", Artifact)];
-    return {artifacts: allArtifacts, node: check getBallerinaNode()};
+import ballerina/jballerina.java;
+
+isolated function getRuntimeRegistrationRequest() returns RuntimeRegistrationRequest|error {
+    RuntimeRegistrationRequest request = {
+        runtimeId: runtimeId,
+        nodeInfo: check getBallerinaNode(),
+        artifacts: {
+            listeners: check getListenerDetails(),
+            services: check getServiceDetails()
+        }
+    };
+    return request;
 }
+
+isolated function getHeartbeat() returns Heartbeat|error {
+    Heartbeat heartbeat = {
+        runtimeId: runtimeId,
+        artifacts: {
+            listeners: check getListenerDetails(),
+            services: check getServiceDetails()
+        }
+    };
+    return heartbeat;
+}
+
+isolated function getListenerDetails() returns ListenerDetail[]|error {
+    Artifact[] artifacts = check getListeners();
+    return artifacts.map(artifact => <ListenerDetail>check getDetailedArtifact(LISTENER, artifact.name));
+}
+
+isolated function getServiceDetails() returns ServiceDetail[]|error {
+    Artifact[] artifacts = check getServices();
+    return artifacts.map(artifact => <ServiceDetail>check getDetailedArtifact(SERVICE, artifact.name));
+}
+
+isolated function getServices() returns Artifact[]|error {
+    Artifact[] artifacts = check getArtifacts(SERVICE, Artifact);
+    return artifacts;
+}
+
+isolated function getListeners() returns Artifact[]|error {
+    Artifact[] artifacts = check getArtifacts(LISTENER, Artifact);
+    return artifacts;
+}
+
+isolated function getBallerinaNode() returns Node|error = @java:Method {
+    'class: "io.ballerina.lib.wso2.controlplane.Utils"
+} external;
+
+isolated function getDetailedArtifact(string resourceType, string name) returns ArtifactDetail|error =
+@java:Method {
+    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
+} external;
+
+isolated function getArtifacts(string resourceType, typedesc<anydata> t) returns Artifact[]|error =
+@java:Method {
+    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
+} external;

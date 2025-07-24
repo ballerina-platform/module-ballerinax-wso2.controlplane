@@ -1,6 +1,5 @@
 import ballerina/http;
 import ballerina/log;
-import ballerina/uuid;
 
 public client class IcpClient {
     private final http:Client httpClient;
@@ -12,24 +11,12 @@ public client class IcpClient {
     }
 
     // Register runtime with ICP server
-    isolated remote function registerRuntime(IntegrationStatus integrations) returns error? {
-        RuntimeRegistration payload = {
-            runtimeId: uuid:createRandomUuid(),
-            runtimeType: self.config.runtime.runtimeType,
-            version: integrations.node.ballerinaHome,
-            environment: self.config.runtime.environment,
-            hostname: "localhost",
-            integrations: {
-                count: integrations.artifacts.length(),
-                list: integrations.artifacts
-            },
-            metricsEnabled: self.config.observability.metricsEnabled
-        };
+    isolated remote function registerRuntime(RuntimeRegistrationRequest runtimeRegistration) returns error? {
 
         http:Request request = new;
         request.setHeader("Authorization", self.config.icp.authToken);
-        request.setPayload(payload);
-        log:printInfo("Registering runtime with ICP server: " + payload.toString());
+        request.setPayload(runtimeRegistration);
+        log:printInfo("Registering runtime with ICP server: " + runtimeRegistration.toJsonString());
         // http:Response response = check self.httpClient->post("/register", request);
         // if response.statusCode != http:STATUS_CREATED {
         //     log:printError("Failed to register runtime with ICP server");
@@ -38,18 +25,11 @@ public client class IcpClient {
     }
 
     // Send heartbeat to ICP server
-    isolated remote function sendHeartbeat(IntegrationStatus integrationStatus) returns error? {
-        Heartbeat payload = {
-            runtimeId: self.config.runtime.id,
-            integrations: integrationStatus,
-            opensearchUrl: self.config.observability.opensearchUrl,
-            metricsEnabled: self.config.observability.metricsEnabled
-        };
-
+    isolated remote function sendHeartbeat(Heartbeat heartbeat) returns error? {
         http:Request request = new;
         request.setHeader("Authorization", self.config.icp.authToken);
-        request.setPayload(payload);
-        log:printInfo("Sending heartbeat to ICP server: " + payload.toJsonString());
+        request.setPayload(heartbeat);
+        log:printInfo("Sending heartbeat to ICP server: " + heartbeat.toJsonString());
 
         // http:Response response = check self.httpClient->post("/heartbeat", request);
         // if response.statusCode != http:STATUS_OK {

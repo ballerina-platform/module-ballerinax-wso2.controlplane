@@ -1,10 +1,32 @@
+// Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/task;
 
-
 function init() returns error? {
-    log:printInfo("Starting ICP Agent...");
+    worker w1 returns error? {
+        check startICPAgent();
+    }
+
+}
+
+function startICPAgent() returns error? {
+    log:printInfo("Starting ICP agent...");
 
     // Load configuration
     IcpConfig config = check loadConfig();
@@ -12,14 +34,10 @@ function init() returns error? {
 
     // Initialize ICP client
     IcpClient icpClient = check new (config);
-    log:printInfo("ICP Client initialized with server URL: " + config.icp.serverUrl);
-
-    // Get initial integration status
-    IntegrationStatus integrations = check getCurrentIntegrations();
-    log:printInfo("Current integrations: " + integrations.toJsonString());
+    log:printInfo("ICP agent initialized with server URL: " + config.icp.serverUrl);
 
     // Register with ICP server
-    check icpClient->registerRuntime(integrations);
+    check icpClient->registerRuntime(check getRuntimeRegistrationRequest());
     log:printInfo("Runtime registered with ICP server");
 
     // Start periodic heartbeat
@@ -30,7 +48,7 @@ function init() returns error? {
         return error("Heartbeat scheduling failed");
     }
 
-    log:printInfo("ICP Agent started successfully with job ID: " + result.toString());
+    log:printInfo("ICP agent started successfully with job ID: " + result.toString());
 
     // Keep the main function running to allow periodic tasks to execute
     while true {
@@ -53,12 +71,12 @@ public class HeartbeatJob {
     # Executes the heartbeat job.
     public function execute() {
         // Get current integration status
-        IntegrationStatus|error integrationStatus = getCurrentIntegrations();
-        if integrationStatus is error {
-            log:printError("Failed to get current integrations to send heartbeat", integrationStatus);
+        Heartbeat|error heartbeat = getHeartbeat();
+        if heartbeat is error {
+            log:printError("Failed to create heartbeat", heartbeat);
             return;
         }
-        error? result = self.icpClient->sendHeartbeat(integrationStatus);
+        error? result = self.icpClient->sendHeartbeat(heartbeat);
         if result is error {
             log:printError("Failed to send heartbeat", result);
         } else {

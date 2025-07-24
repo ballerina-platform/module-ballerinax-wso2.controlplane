@@ -26,8 +26,6 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
-import java.io.PrintStream;
-
 import static io.ballerina.lib.wso2.controlplane.Constants.ARTIFACT;
 import static io.ballerina.lib.wso2.controlplane.Constants.BALLERINA_HOME;
 import static io.ballerina.lib.wso2.controlplane.Constants.BAL_HOME;
@@ -47,10 +45,6 @@ public class Utils {
 
     public static Object getBallerinaNode(Environment env) {
         Module currentModule = env.getCurrentModule();
-        PrintStream out = System.out;
-        out.println(env.getCurrentModule());
-        out.println(env.getRepository());
-        out.println(env.getRepository().getArtifacts());
         Node node = env.getRepository().getNode();
         BMap<BString, Object> nodeEntries = ValueCreator.createMapValue();
         nodeEntries.put(StringUtils.fromString(PLATFORM_VERSION),
