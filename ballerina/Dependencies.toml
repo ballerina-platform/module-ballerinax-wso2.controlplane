@@ -336,7 +336,6 @@ dependencies = [
 	{org = "ballerina", name = "time"}
 ]
 modules = [
-	{org = "ballerinax", packageName = "wso2.controlplane", moduleName = "wso2.controlplane"},
-	{org = "ballerinax", packageName = "wso2.controlplane", moduleName = "wso2.controlplane.types"}
+	{org = "ballerinax", packageName = "wso2.controlplane", moduleName = "wso2.controlplane"}
 ]
 
