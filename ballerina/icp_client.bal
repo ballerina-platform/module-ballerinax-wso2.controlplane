@@ -12,16 +12,15 @@ public client class IcpClient {
 
     // Register runtime with ICP server
     isolated remote function registerRuntime(RuntimeRegistrationRequest runtimeRegistration) returns error? {
-
         http:Request request = new;
         request.setHeader("Authorization", self.config.icp.authToken);
         request.setPayload(runtimeRegistration);
         log:printInfo("Registering runtime with ICP server: " + runtimeRegistration.toJsonString());
-        // http:Response response = check self.httpClient->post("/register", request);
-        // if response.statusCode != http:STATUS_CREATED {
-        //     log:printError("Failed to register runtime with ICP server");
-        //     return error("Registration failed ");
-        // }
+        http:Response response = check self.httpClient->post("/icp/register", request);
+        if response.statusCode != http:STATUS_CREATED {
+            log:printError("Failed to register runtime with ICP server");
+            return error("Registration failed ");
+        }
     }
 
     // Send heartbeat to ICP server
@@ -31,11 +30,17 @@ public client class IcpClient {
         request.setPayload(heartbeat);
         log:printInfo("Sending heartbeat to ICP server: " + heartbeat.toJsonString());
 
-        // http:Response response = check self.httpClient->post("/heartbeat", request);
-        // if response.statusCode != http:STATUS_OK {
-        // log:printWarn("Heartbeat failed: " + response.statusCode.toString());
-        // return error("Heartbeat failed");
-        // }
+        HeartbeatResponse heartbeatResponse = check self.httpClient->post("/icp/heartbeat", request);
+        if heartbeatResponse.acknowledged {
+            log:printInfo("Heartbeat acknowledged by ICP server");
+            if heartbeatResponse.commands is ControlCommand[] {
+                log:printInfo("Received control commands: " + heartbeatResponse.commands.toJsonString());
+                // Process control commands if needed
+            }
+        } else {
+            log:printError("Heartbeat not acknowledged by ICP server");
+            return error("Heartbeat not acknowledged");
+        }
     }
 
 }

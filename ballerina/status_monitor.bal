@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/jballerina.java;
+import ballerina/time;
 
 isolated function getRuntimeRegistrationRequest() returns RuntimeRegistrationRequest|error {
     RuntimeRegistrationRequest request = {
@@ -34,7 +35,9 @@ isolated function getHeartbeat() returns Heartbeat|error {
         artifacts: {
             listeners: check getListenerDetails(),
             services: check getServiceDetails()
-        }
+        },
+        status: RUNNING,
+        timestamp: time:utcNow()
     };
     return heartbeat;
 }
