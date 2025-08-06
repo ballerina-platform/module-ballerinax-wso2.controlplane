@@ -17,26 +17,17 @@
 import ballerina/jballerina.java;
 import ballerina/time;
 
-isolated function getRuntimeRegistrationRequest() returns RuntimeRegistrationRequest|error {
-    RuntimeRegistrationRequest request = {
-        runtimeId: runtimeId,
-        nodeInfo: check getBallerinaNode(),
-        artifacts: {
-            listeners: check getListenerDetails(),
-            services: check getServiceDetails()
-        }
-    };
-    return request;
-}
-
 isolated function getHeartbeat() returns Heartbeat|error {
     Heartbeat heartbeat = {
         runtimeId: runtimeId,
+        runtimeType: BI,
+        status: RUNNING,
+        nodeInfo: check getBallerinaNode(),
+        environment: environment,
         artifacts: {
             listeners: check getListenerDetails(),
             services: check getServiceDetails()
         },
-        status: RUNNING,
         timestamp: time:utcNow()
     };
     return heartbeat;

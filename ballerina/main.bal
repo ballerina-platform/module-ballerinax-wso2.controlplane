@@ -22,7 +22,6 @@ function init() returns error? {
     worker w1 returns error? {
         check startICPAgent();
     }
-
 }
 
 function startICPAgent() returns error? {
@@ -35,10 +34,6 @@ function startICPAgent() returns error? {
     // Initialize ICP client
     IcpClient icpClient = check new (config);
     log:printInfo("ICP agent initialized with server URL: " + config.icp.serverUrl);
-
-    // Register with ICP server
-    check icpClient->registerRuntime(check getRuntimeRegistrationRequest());
-    log:printInfo("Runtime registered with ICP server");
 
     // Start periodic heartbeat
     HeartbeatJob heartbeatJob = new (icpClient, config.icp.heartbeatInterval);
@@ -79,8 +74,6 @@ public class HeartbeatJob {
         error? result = self.icpClient->sendHeartbeat(heartbeat);
         if result is error {
             log:printError("Failed to send heartbeat", result);
-        } else {
-            log:printInfo("Heartbeat sent successfully");
         }
     }
 }
