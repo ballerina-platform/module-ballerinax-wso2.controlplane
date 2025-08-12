@@ -36,7 +36,7 @@ function startICPAgent() returns error? {
     log:printInfo("ICP agent initialized with server URL: " + config.icp.serverUrl);
 
     // Start periodic heartbeat
-    HeartbeatJob heartbeatJob = new (icpClient, config.icp.heartbeatInterval);
+    HeartbeatJob heartbeatJob = check new (icpClient, config.icp.heartbeatInterval);
     task:JobId|task:Error result = task:scheduleJobRecurByFrequency(heartbeatJob, config.icp.heartbeatInterval);
     if result is task:Error {
         log:printError("Failed to start heartbeat job", result);
@@ -58,7 +58,7 @@ public class HeartbeatJob {
     private final IcpClient icpClient;
     private final decimal interval;
 
-    public function init(IcpClient icpClient, decimal interval) {
+    public function init(IcpClient icpClient, decimal interval) returns error? {
         self.icpClient = icpClient;
         self.interval = interval;
     }
@@ -71,9 +71,33 @@ public class HeartbeatJob {
             log:printError("Failed to create heartbeat", heartbeat);
             return;
         }
-        error? result = self.icpClient->sendHeartbeat(heartbeat);
-        if result is error {
-            log:printError("Failed to send heartbeat", result);
+
+        // Create delta heartbeat with hash
+        DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(heartbeat);
+        if deltaHeartbeat is error {
+            log:printError("Failed to create delta heartbeat", deltaHeartbeat);
+            return;
+        }
+
+        // Send delta heartbeat first
+        HeartbeatResponse|error deltaResponse = self.icpClient->sendDeltaHeartbeat(deltaHeartbeat);
+        if deltaResponse is error {
+            log:printError("Failed to send delta heartbeat", deltaResponse);
+            return;
+        }
+
+        // Check if server requests full heartbeat
+        boolean fullHeartbeatRequired = deltaResponse.fullHeartbeatRequired ?: false;
+        if fullHeartbeatRequired {
+            log:printInfo("Server requested full heartbeat");
+            error? fullHeartbeatResult = self.icpClient->sendHeartbeat(heartbeat);
+            if fullHeartbeatResult is error {
+                log:printError("Failed to send full heartbeat", fullHeartbeatResult);
+            } else {
+                log:printInfo("Full heartbeat sent successfully");
+            }
+        } else {
+            log:printInfo("Delta heartbeat sufficient, no full heartbeat required");
         }
     }
 }

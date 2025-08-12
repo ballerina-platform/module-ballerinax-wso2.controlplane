@@ -17,6 +17,8 @@
 import ballerina/http;
 import ballerina/log;
 
+# ICP Client
+# This client is responsible for communicating with the ICP server to send heartbeats and receive control commands
 public client class IcpClient {
     private final http:Client httpClient;
     private final IcpConfig config;
@@ -30,21 +32,40 @@ public client class IcpClient {
         });
     }
 
-    // Send heartbeat to ICP server
+    // Send delta heartbeat to ICP server
+    isolated remote function sendDeltaHeartbeat(DeltaHeartbeat deltaHeartbeat) returns HeartbeatResponse|error {
+        http:Request request = new;
+        request.setHeader("Authorization", string `Bearer ${self.config.icp.authToken}`);
+        request.setPayload(deltaHeartbeat);
+        log:printInfo("Sending delta heartbeat to ICP server");
+
+        HeartbeatResponse heartbeatResponse = check self.httpClient->post("/icp/deltaHeartbeat", request);
+        if heartbeatResponse.acknowledged {
+            log:printInfo("Delta heartbeat acknowledged by ICP server");
+            if heartbeatResponse.commands is ControlCommand[] {
+                log:printInfo("Received control commands: " + heartbeatResponse.commands.toJsonString());
+            }
+        } else {
+            log:printError("Delta heartbeat not acknowledged by ICP server");
+        }
+        return heartbeatResponse;
+    }
+
+    // Send full heartbeat to ICP server
     isolated remote function sendHeartbeat(Heartbeat heartbeat) returns error? {
         http:Request request = new;
         request.setHeader("Authorization", string `Bearer ${self.config.icp.authToken}`);
         request.setPayload(heartbeat);
+        log:printInfo("Sending full heartbeat to ICP server");
 
         HeartbeatResponse heartbeatResponse = check self.httpClient->post("/icp/heartbeat", request);
         if heartbeatResponse.acknowledged {
-            log:printInfo("Heartbeat acknowledged by ICP server");
+            log:printInfo("Full heartbeat acknowledged by ICP server");
             if heartbeatResponse.commands is ControlCommand[] {
                 log:printInfo("Received control commands: " + heartbeatResponse.commands.toJsonString());
-                // Process control commands if needed
             }
         } else {
-            log:printError("Heartbeat not acknowledged by ICP server");
+            log:printError("Full heartbeat not acknowledged by ICP server");
             return error("Heartbeat not acknowledged");
         }
     }

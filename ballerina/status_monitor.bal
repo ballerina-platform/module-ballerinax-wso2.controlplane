@@ -14,11 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/crypto;
 import ballerina/jballerina.java;
 import ballerina/time;
 
 isolated function getHeartbeat() returns Heartbeat|error {
-    Heartbeat heartbeat = {
+    // First create heartbeat data without hash and timestamp
+    HeartbeatForHash heartbeatForHash = {
         runtimeId: runtimeId,
         runtimeType: BI,
         status: RUNNING,
@@ -27,10 +29,41 @@ isolated function getHeartbeat() returns Heartbeat|error {
         artifacts: {
             listeners: check getListenerDetails(),
             services: check getServiceDetails()
-        },
+        }
+    };
+
+    // Calculate hash from the heartbeat content (excluding timestamp)
+    string heartbeatContent = heartbeatForHash.toJsonString();
+    string runtimeHash = calculateSimpleHash(heartbeatContent);
+
+    // Create full heartbeat with hash and timestamp
+    Heartbeat heartbeat = {
+        runtimeId: heartbeatForHash.runtimeId,
+        runtimeType: heartbeatForHash.runtimeType,
+        status: heartbeatForHash.status,
+        nodeInfo: heartbeatForHash.nodeInfo,
+        environment: heartbeatForHash.environment,
+        deploymentType: heartbeatForHash.deploymentType,
+        version: heartbeatForHash.version,
+        artifacts: heartbeatForHash.artifacts,
+        runtimeHash: runtimeHash,
         timestamp: time:utcNow()
     };
+
     return heartbeat;
+}
+
+isolated function getDeltaHeartbeat(Heartbeat heartbeat) returns DeltaHeartbeat|error {
+    DeltaHeartbeat deltaHeartbeat = {
+        runtimeId: heartbeat.runtimeId,
+        runtimeHash: heartbeat.runtimeHash,
+        timestamp: heartbeat.timestamp
+    };
+    return deltaHeartbeat;
+}
+
+isolated function calculateSimpleHash(string content) returns string {
+    return crypto:hashMd5(content.toBytes()).toBase64();
 }
 
 isolated function getListenerDetails() returns ListenerDetail[]|error {

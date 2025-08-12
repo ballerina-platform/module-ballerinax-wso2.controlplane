@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/time;
-import ballerina/uuid;
 
 // === Enums ===
 
@@ -103,7 +102,7 @@ public type BallerinaRuntime record {
 
 // === Runtime Communication Types ===
 
-public type Heartbeat record {
+public type Heartbeat record {|
     string runtimeId;
     RuntimeType runtimeType;
     RuntimeStatus status;
@@ -112,22 +111,48 @@ public type Heartbeat record {
     string version?;
     Node nodeInfo;
     Artifacts artifacts;
+    string runtimeHash;
     time:Utc timestamp;
-};
+|};
+
+public type HeartbeatForHash record {|
+    string runtimeId;
+    RuntimeType runtimeType;
+    RuntimeStatus status;
+    string environment?;
+    string deploymentType?;
+    string version?;
+    Node nodeInfo;
+    Artifacts artifacts;
+|};
+
+public type DeltaHeartbeat record {|
+    string runtimeId;
+    string runtimeHash;
+    time:Utc timestamp;
+|};
 
 // === ICP Control Types ===
 
-public type ControlCommand record {
+public enum ControlCommandStatus {
+    PENDING,
+    SENT,
+    ACKNOWLEDGED,
+    FAILED
+};
+
+public type ControlCommand record {|
     string commandId;
     string runtimeId;
     string targetArtifact;
     string action;
     time:Utc issuedAt;
-    string status; // pending, sent, acknowledged, failed
-};
+    ControlCommandStatus status; // pending, sent, acknowledged, failed
+|};
 
 public type HeartbeatResponse record {
     boolean acknowledged;
+    boolean fullHeartbeatRequired?;
     ControlCommand[] commands?;
 };
 
@@ -150,43 +175,7 @@ public type IcpConfig record {|
     Observability observability;
 |};
 
-public type DashBoard record {
-    string url;
-    int heartbeatInterval = 10;
-    decimal waitTimeForServicesInSeconds = 5;
-    string groupId;
-    string nodeId = uuid:createType4AsString();
-    string mgtApiUrl;
-    string serviceAccount = "bal_admin";
-    string serviceAccountPassword = "bal_secret";
-};
-
-public type RequestLimit record {
-    int maxUriLength;
-    int maxHeaderSize;
-    int maxEntityBodySize;
-};
-
 // === Summary / View Types ===
-
-public type RuntimeSummary record {
-    string runtimeId;
-    RuntimeType runtimeType;
-    RuntimeStatus status;
-    string environment?;
-    int totalServices;
-    int totalListeners;
-    time:Utc lastHeartbeat?;
-    boolean isOnline;
-};
-
-public type IntegrationSummary record {
-    string runtimeId;
-    string artifactName;
-    string artifactType; // service or listener
-    ArtifactState state;
-    string package;
-};
 
 public type ChangeNotification record {
     anydata[] deployedArtifacts;
@@ -212,3 +201,9 @@ public type ApiResponse record {
 public type AccessTokenResponse record {|
     string AccessToken;
 |};
+
+public type RequestLimit record {
+    int maxUriLength;
+    int maxHeaderSize;
+    int maxEntityBodySize;
+};
