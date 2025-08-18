@@ -17,7 +17,7 @@
 import ballerina/jwt;
 import ballerina/lang.array;
 
-final string issuer = string `https://localhost:${icpServicePort}/`;
+final string issuer = serverUrl;
 
 string|error jwt = generateJwtToken();
 

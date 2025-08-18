@@ -17,12 +17,14 @@
 import ballerina/file;
 import ballerina/os;
 
-configurable string serverUrl = "http://localhost:9264";
+configurable string serverUrl = "https://localhost:8080";
 configurable string authToken = "";
-configurable decimal heartbeatInterval = 5.0;
+configurable decimal heartbeatInterval = 10.0;
 configurable string opensearchURL = "";
-configurable string logIndex = "icp-logs";
+configurable string logIndex = "bi-client-logs";
 configurable boolean metricsEnabled = false;
+configurable string cert = "";
+configurable boolean enableSSL = false;
 
 // configurable DashBoard dashboard = ?;
 configurable string keyStorePath = check getDefaultKeyStore();
@@ -38,8 +40,6 @@ function getDefaultTrustStore() returns string|error {
     return trustStorePath;
 }
 
-configurable int icpServicePort = 9264;
-
 function getDefaultKeyStore() returns string|error {
     string keyStorePath = check file:joinPath(os:getEnv("BALLERINA_HOME"), "bre", "security", "ballerinaKeystore.p12");
     return keyStorePath;
@@ -50,7 +50,9 @@ public function loadConfig() returns IcpConfig|error {
         icp: {
             serverUrl: serverUrl,
             authToken: authToken,
-            heartbeatInterval: heartbeatInterval
+            heartbeatInterval: heartbeatInterval,
+            cert: cert,
+            enableSSL: enableSSL
         },
         observability: {
             opensearchUrl: opensearchURL,

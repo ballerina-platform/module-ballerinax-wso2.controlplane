@@ -161,6 +161,8 @@ public type HeartbeatResponse record {
 public type IcpServer record {|
     string serverUrl;
     string authToken;
+    string cert;
+    boolean enableSSL;
     decimal heartbeatInterval;
 |};
 
