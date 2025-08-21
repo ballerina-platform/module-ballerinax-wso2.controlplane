@@ -17,8 +17,7 @@
 import ballerina/file;
 import ballerina/os;
 
-configurable string serverUrl = "https://localhost:8080";
-configurable string authToken = "";
+configurable string serverUrl = "https://localhost:9445";
 configurable decimal heartbeatInterval = 10.0;
 configurable string opensearchURL = "";
 configurable string logIndex = "bi-client-logs";
@@ -26,14 +25,21 @@ configurable boolean metricsEnabled = false;
 configurable string cert = "";
 configurable boolean enableSSL = false;
 
-// configurable DashBoard dashboard = ?;
+// keystore configs
 configurable string keyStorePath = check getDefaultKeyStore();
 configurable string keyStorePassword = "ballerina";
 configurable string trustStorePath = check getDefaultTrustStore();
 configurable string trustStorePassword = "ballerina";
 
+// jwt configuration
+configurable string jwtIssuer = "icp-jwt-issuer";
+configurable string|string[] jwtAudience = "icp-server";
+configurable string privateKeyFile = "./resources/keys/private.key";
+configurable decimal jwtExpiryTimeSeconds = 3600;
+
 configurable string runtimeId = ?;
 configurable string environment = "Development";
+configurable string deploymentType = "";
 
 function getDefaultTrustStore() returns string|error {
     string trustStorePath = check file:joinPath(os:getEnv("BALLERINA_HOME"), "bre", "security", "ballerinaTruststore.p12");
@@ -49,7 +55,6 @@ public function loadConfig() returns IcpConfig|error {
     IcpConfig config = {
         icp: {
             serverUrl: serverUrl,
-            authToken: authToken,
             heartbeatInterval: heartbeatInterval,
             cert: cert,
             enableSSL: enableSSL
@@ -58,7 +63,9 @@ public function loadConfig() returns IcpConfig|error {
             opensearchUrl: opensearchURL,
             logIndex: logIndex,
             metricsEnabled: metricsEnabled
-        }
+        },
+        keyStorePath: keyStorePath,
+        keyStorePassword: keyStorePassword
     };
     return config;
 }

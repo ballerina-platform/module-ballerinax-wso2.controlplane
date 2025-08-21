@@ -21,6 +21,7 @@ import ballerina/log;
 # This client is responsible for communicating with the ICP server to send heartbeats and receive control commands
 public client class IcpClient {
     private final http:Client httpClient;
+    private final string jwtToken;
 
     public function init(IcpConfig config) returns http:ClientError? {
         self.httpClient = check new (config.icp.serverUrl,
@@ -39,7 +40,8 @@ public client class IcpClient {
     // Send delta heartbeat to ICP server
     isolated remote function sendDeltaHeartbeat(DeltaHeartbeat deltaHeartbeat) returns HeartbeatResponse|error {
         http:Request request = new;
-        request.setHeader("Authorization", string `Bearer `);
+
+        request.setHeader(http:AUTH_HEADER, string `${http:AUTH_SCHEME_BEARER} ${check generateJwtToken()}`);
         request.setPayload(deltaHeartbeat);
         log:printInfo("Sending delta heartbeat to ICP server");
 
@@ -58,7 +60,7 @@ public client class IcpClient {
     // Send full heartbeat to ICP server
     isolated remote function sendHeartbeat(Heartbeat heartbeat) returns error? {
         http:Request request = new;
-        request.setHeader("Authorization", string `Bearer `);
+        request.setHeader(http:AUTH_HEADER, string `${http:AUTH_SCHEME_BEARER} ${check generateJwtToken()}`);
         request.setPayload(heartbeat);
         log:printInfo("Sending full heartbeat to ICP server");
 

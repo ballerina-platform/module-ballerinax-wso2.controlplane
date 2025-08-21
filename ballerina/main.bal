@@ -31,7 +31,7 @@ function startICPAgent() returns error? {
     IcpConfig config = check loadConfig();
     log:printInfo("Loaded ICP configuration: " + config.toJsonString());
 
-    // Initialize ICP client
+    // Initialize ICP client (JWT is generated internally from config)
     IcpClient icpClient = check new (config);
     log:printInfo("ICP agent initialized with server URL: " + config.icp.serverUrl);
 

@@ -25,6 +25,7 @@ isolated function getHeartbeat() returns Heartbeat|error {
         runtimeType: BI,
         status: RUNNING,
         nodeInfo: check getBallerinaNode(),
+        deploymentType: deploymentType,
         environment: environment,
         artifacts: {
             listeners: check getListenerDetails(),

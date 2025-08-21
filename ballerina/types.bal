@@ -87,19 +87,6 @@ public type Node record {
     string osVersion?;
 };
 
-public type BallerinaRuntime record {
-    string runtimeId;
-    RuntimeType runtimeType;
-    RuntimeStatus status;
-    string environment?;
-    string deploymentType?;
-    string version?;
-    Node nodeInfo;
-    Artifacts artifacts;
-    time:Utc registrationTime?;
-    time:Utc lastHeartbeat?;
-};
-
 // === Runtime Communication Types ===
 
 public type Heartbeat record {|
@@ -107,7 +94,7 @@ public type Heartbeat record {|
     RuntimeType runtimeType;
     RuntimeStatus status;
     string environment?;
-    string deploymentType?;
+    string deploymentType = deploymentType;
     string version?;
     Node nodeInfo;
     Artifacts artifacts;
@@ -120,7 +107,7 @@ public type HeartbeatForHash record {|
     RuntimeType runtimeType;
     RuntimeStatus status;
     string environment?;
-    string deploymentType?;
+    string deploymentType;
     string version?;
     Node nodeInfo;
     Artifacts artifacts;
@@ -160,7 +147,6 @@ public type HeartbeatResponse record {
 
 public type IcpServer record {|
     string serverUrl;
-    string authToken;
     string cert;
     boolean enableSSL;
     decimal heartbeatInterval;
@@ -175,33 +161,8 @@ public type Observability record {|
 public type IcpConfig record {|
     IcpServer icp;
     Observability observability;
-|};
-
-// === Summary / View Types ===
-
-public type ChangeNotification record {
-    anydata[] deployedArtifacts;
-    anydata[] undeployedArtifacts;
-    anydata[] stateChangedArtifacts;
-};
-
-// === API Wrappers / Auth ===
-
-public type UserClaims record {
-    string sub;
-    string[] roles;
-    int exp;
-};
-
-public type ApiResponse record {
-    boolean success;
-    string message?;
-    json data?;
-    string[] errors?;
-};
-
-public type AccessTokenResponse record {|
-    string AccessToken;
+    string keyStorePath;
+    string keyStorePassword;
 |};
 
 public type RequestLimit record {

@@ -1,0 +1,31 @@
+## WSO2 Control Plane Configuration
+
+## ICP Server Configuration
+# serverUrl = "https://localhost:9445"
+# heartbeatInterval = 10.0
+
+## Observability Configuration
+# opensearchURL = "https://localhost:9200"
+# logIndex = "bi-client-logs"
+# metricsEnabled = true
+
+## SSL Configuration
+# cert = "/path/to/server-cert.pem"
+# enableSSL = true
+
+## Keystore Configuration
+# keyStorePath = "/path/to/ballerina/bre/security/ballerinaKeystore.p12"
+# keyStorePassword = "ballerina"
+# trustStorePath = "/path/to/ballerina/bre/security/ballerinaTruststore.p12"
+# trustStorePassword = "ballerina"
+
+## JWT Configuration
+# jwtIssuer = "icp-jwt-issuer"
+# jwtAudience = "icp-server"
+# privateKeyFile = "./resources/keys/private.key"
+# jwtExpiryTimeSeconds = 3600
+
+## Runtime Configuration
+# runtimeId = "runtime-001"
+# environment = "Production"
+# deployment = "Docker"
