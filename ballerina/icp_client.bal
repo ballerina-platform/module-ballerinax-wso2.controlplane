@@ -71,7 +71,7 @@ public client class IcpClient {
                 log:printInfo("Received control commands: " + heartbeatResponse.commands.toJsonString());
             }
         } else {
-            log:printError("Full heartbeat not acknowledged by ICP server");
+            log:printError("Full heartbeat not acknowledged by ICP server: " + heartbeatResponse.toJsonString());
             return error("Heartbeat not acknowledged");
         }
     }

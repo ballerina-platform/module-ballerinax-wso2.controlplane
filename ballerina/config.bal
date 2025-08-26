@@ -38,8 +38,10 @@ configurable string privateKeyFile = "./resources/keys/private.key";
 configurable decimal jwtExpiryTimeSeconds = 3600;
 
 configurable string runtimeId = ?;
-configurable string environment = "Development";
-configurable string deploymentType = "";
+configurable string environment = "dev";
+configurable string deploymentType = "k8s";
+configurable string component = "default_component";
+configurable string project = "default_project";
 
 function getDefaultTrustStore() returns string|error {
     string trustStorePath = check file:joinPath(os:getEnv("BALLERINA_HOME"), "bre", "security", "ballerinaTruststore.p12");

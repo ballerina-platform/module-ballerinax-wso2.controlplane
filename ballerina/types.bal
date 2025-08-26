@@ -93,8 +93,10 @@ public type Heartbeat record {|
     string runtimeId;
     RuntimeType runtimeType;
     RuntimeStatus status;
-    string environment?;
+    string environment = environment;
     string deploymentType = deploymentType;
+    string project?;
+    string component?;
     string version?;
     Node nodeInfo;
     Artifacts artifacts;
@@ -106,8 +108,10 @@ public type HeartbeatForHash record {|
     string runtimeId;
     RuntimeType runtimeType;
     RuntimeStatus status;
-    string environment?;
+    string environment;
     string deploymentType;
+    string project?;
+    string component?;
     string version?;
     Node nodeInfo;
     Artifacts artifacts;

@@ -88,14 +88,14 @@ public class HeartbeatJob {
         if deltaResponse.acknowledged {
             log:printInfo("Delta heartbeat acknowledged by ICP server");
         } else {
-            log:printError("Delta heartbeat not acknowledged by ICP server");
+            log:printError("Delta heartbeat not acknowledged by ICP server: " + deltaResponse.toJsonString());
             return;
         }
 
         // Check if server requests full heartbeat
         boolean fullHeartbeatRequired = deltaResponse.fullHeartbeatRequired ?: false;
         if fullHeartbeatRequired {
-            log:printInfo("Server requested full heartbeat");
+            log:printInfo("ICP server requested full heartbeat");
             error? fullHeartbeatResult = self.icpClient->sendHeartbeat(heartbeat);
             if fullHeartbeatResult is error {
                 log:printError("Failed to send full heartbeat", fullHeartbeatResult);
