@@ -94,9 +94,8 @@ public type Heartbeat record {|
     RuntimeType runtimeType;
     RuntimeStatus status;
     string environment = environment;
-    string deploymentType = deploymentType;
-    string project?;
-    string component?;
+    string project;
+    string component;
     string version?;
     Node nodeInfo;
     Artifacts artifacts;
@@ -109,9 +108,8 @@ public type HeartbeatForHash record {|
     RuntimeType runtimeType;
     RuntimeStatus status;
     string environment;
-    string deploymentType;
-    string project?;
-    string component?;
+    string project;
+    string component;
     string version?;
     Node nodeInfo;
     Artifacts artifacts;
@@ -153,7 +151,7 @@ public type IcpServer record {|
     string serverUrl;
     string cert;
     boolean enableSSL;
-    decimal heartbeatInterval;
+    int heartbeatInterval;
 |};
 
 public type Observability record {|

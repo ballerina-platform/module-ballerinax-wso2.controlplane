@@ -18,7 +18,7 @@ import ballerina/file;
 import ballerina/os;
 
 configurable string serverUrl = "https://localhost:9445";
-configurable decimal heartbeatInterval = 10.0;
+configurable int heartbeatInterval = 10;
 configurable string opensearchURL = "";
 configurable string logIndex = "bi-client-logs";
 configurable boolean metricsEnabled = false;
@@ -38,8 +38,7 @@ configurable string privateKeyFile = "./resources/keys/private.key";
 configurable decimal jwtExpiryTimeSeconds = 3600;
 
 configurable string runtimeId = ?;
-configurable string environment = "dev";
-configurable string deploymentType = "k8s";
+configurable string environment = "Dev";
 configurable string component = "default_component";
 configurable string project = "default_project";
 

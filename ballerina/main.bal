@@ -36,8 +36,8 @@ function startICPAgent() returns error? {
     log:printInfo("ICP agent initialized with server URL: " + config.icp.serverUrl);
 
     // Start periodic heartbeat
-    HeartbeatJob heartbeatJob = check new (icpClient, config.icp.heartbeatInterval);
-    task:JobId|task:Error result = task:scheduleJobRecurByFrequency(heartbeatJob, config.icp.heartbeatInterval);
+    HeartbeatJob heartbeatJob = check new (icpClient, <decimal>config.icp.heartbeatInterval);
+    task:JobId|task:Error result = task:scheduleJobRecurByFrequency(heartbeatJob, <decimal>config.icp.heartbeatInterval);
     if result is task:Error {
         log:printError("Failed to start heartbeat job", result);
         return error("Heartbeat scheduling failed");
