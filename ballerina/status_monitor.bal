@@ -1,0 +1,104 @@
+// Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+import ballerina/crypto;
+import ballerina/jballerina.java;
+import ballerina/time;
+
+isolated function getHeartbeat() returns Heartbeat|error {
+    // First create heartbeat data without hash and timestamp
+    HeartbeatForHash heartbeatForHash = {
+        runtimeId: runtimeId,
+        runtimeType: BI,
+        status: RUNNING,
+        nodeInfo: check getBallerinaNode(),
+        environment: environment,
+        project: project,
+        component: component,
+        artifacts: {
+            listeners: check getListenerDetails(),
+            services: check getServiceDetails()
+        }
+    };
+
+    // Calculate hash from the heartbeat content (excluding timestamp)
+    string heartbeatContent = heartbeatForHash.toJsonString();
+    string runtimeHash = calculateSimpleHash(heartbeatContent);
+
+    // Create full heartbeat with hash and timestamp
+    Heartbeat heartbeat = {
+        runtimeId: heartbeatForHash.runtimeId,
+        runtimeType: heartbeatForHash.runtimeType,
+        status: heartbeatForHash.status,
+        nodeInfo: heartbeatForHash.nodeInfo,
+        environment: heartbeatForHash.environment,
+        project: heartbeatForHash.project,
+        component: heartbeatForHash.component,
+        version: heartbeatForHash.version,
+        artifacts: heartbeatForHash.artifacts,
+        runtimeHash: runtimeHash,
+        timestamp: time:utcNow()
+    };
+
+    return heartbeat;
+}
+
+isolated function getDeltaHeartbeat(Heartbeat heartbeat) returns DeltaHeartbeat|error {
+    DeltaHeartbeat deltaHeartbeat = {
+        runtimeId: heartbeat.runtimeId,
+        runtimeHash: heartbeat.runtimeHash,
+        timestamp: heartbeat.timestamp
+    };
+    return deltaHeartbeat;
+}
+
+isolated function calculateSimpleHash(string content) returns string {
+    return crypto:hashMd5(content.toBytes()).toBase64();
+}
+
+isolated function getListenerDetails() returns ListenerDetail[]|error {
+    Artifact[] artifacts = check getListeners();
+    return artifacts.map(artifact => <ListenerDetail>check getDetailedArtifact(LISTENER, artifact.name));
+}
+
+isolated function getServiceDetails() returns ServiceDetail[]|error {
+    Artifact[] artifacts = check getServices();
+    return artifacts.map(artifact => <ServiceDetail>check getDetailedArtifact(SERVICE, artifact.name));
+}
+
+isolated function getServices() returns Artifact[]|error {
+    Artifact[] artifacts = check getArtifacts(SERVICE, Artifact);
+    return artifacts;
+}
+
+isolated function getListeners() returns Artifact[]|error {
+    Artifact[] artifacts = check getArtifacts(LISTENER, Artifact);
+    return artifacts;
+}
+
+isolated function getBallerinaNode() returns Node|error = @java:Method {
+    'class: "io.ballerina.lib.wso2.controlplane.Utils"
+} external;
+
+isolated function getDetailedArtifact(string resourceType, string name) returns ArtifactDetail|error =
+@java:Method {
+    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
+} external;
+
+isolated function getArtifacts(string resourceType, typedesc<anydata> t) returns Artifact[]|error =
+@java:Method {
+    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
+} external;

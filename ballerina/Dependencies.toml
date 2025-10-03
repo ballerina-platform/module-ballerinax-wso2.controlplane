@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.12.2"
+distribution-version = "2201.12.7"
 
 [[package]]
 org = "ballerina"
@@ -46,11 +46,14 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
 ]
+modules = [
+	{org = "ballerina", packageName = "crypto", moduleName = "crypto"}
+]
 
 [[package]]
 org = "ballerina"
 name = "data.jsondata"
-version = "1.1.0"
+version = "1.1.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.object"}
@@ -73,7 +76,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.14.1"
+version = "2.14.5"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -154,9 +157,6 @@ version = "0.0.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.__internal"}
-]
-modules = [
-	{org = "ballerina", packageName = "lang.array", moduleName = "lang.array"}
 ]
 
 [[package]]
@@ -246,7 +246,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "oauth2"
-version = "2.14.0"
+version = "2.14.1"
 dependencies = [
 	{org = "ballerina", name = "cache"},
 	{org = "ballerina", name = "crypto"},
@@ -279,10 +279,14 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "task"
-version = "2.7.0"
+version = "2.10.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "time"}
+	{org = "ballerina", name = "time"},
+	{org = "ballerina", name = "uuid"}
+]
+modules = [
+	{org = "ballerina", packageName = "task", moduleName = "task"}
 ]
 
 [[package]]
@@ -291,6 +295,9 @@ name = "time"
 version = "2.7.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerina", packageName = "time", moduleName = "time"}
 ]
 
 [[package]]
@@ -311,24 +318,22 @@ dependencies = [
 	{org = "ballerina", name = "lang.int"},
 	{org = "ballerina", name = "time"}
 ]
-modules = [
-	{org = "ballerina", packageName = "uuid", moduleName = "uuid"}
-]
 
 [[package]]
 org = "ballerinax"
 name = "wso2.controlplane"
 version = "1.1.0"
 dependencies = [
+	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "file"},
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "jwt"},
-	{org = "ballerina", name = "lang.array"},
 	{org = "ballerina", name = "lang.runtime"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "os"},
-	{org = "ballerina", name = "uuid"}
+	{org = "ballerina", name = "task"},
+	{org = "ballerina", name = "time"}
 ]
 modules = [
 	{org = "ballerinax", packageName = "wso2.controlplane", moduleName = "wso2.controlplane"}

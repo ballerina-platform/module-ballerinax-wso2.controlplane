@@ -1,11 +1,11 @@
-// Copyright (c) 2024, WSO2 LLC. (https://www.wso2.com).
+// Copyright (c) 2025, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//  http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
@@ -14,121 +14,161 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/uuid;
+import ballerina/time;
 
-type IntegrationPlaneConnectionRequest record {
-    string product = "bal";
-    string groupId;
-    string nodeId;
-    int interval;
-    string mgtApiUrl;
-    ChangeNotification changeNotification = {
-        deployedArtifacts: [],
-        undeployedArtifacts: [],
-        stateChangedArtifacts: []
-    };
-};
+// === Enums ===
 
-type ChangeNotification record {
-    anydata[] deployedArtifacts;
-    anydata[] undeployedArtifacts;
-    anydata[] stateChangedArtifacts;
-};
+public enum RuntimeType {
+    MI,
+    BI
+}
 
-type AccessTokenResponse record {|
-    string AccessToken;
-|};
+public enum RuntimeStatus {
+    RUNNING,
+    FAILED,
+    DISABLED,
+    OFFLINE,
+    STOPPED
+}
 
-type DashBoard record {
-    string url;
-    int heartbeatInterval = 10;
-    decimal waitTimeForServicesInSeconds = 5;
-    string groupId;
-    string nodeId = uuid:createType4AsString();
-    string mgtApiUrl;
-    string serviceAccount = "bal_admin";
-    string serviceAccountPassword = "bal_secret";
-};
-
-# Represents a list of artifacts in a Ballerina node.
-#
-# + count - the number of artifacts.
-# + list - the list of artifacts.
-public type Artifacts record {
-    int count;
-    Artifact[] list;
-};
+public enum ArtifactState {
+    ENABLED,
+    DISABLED,
+    STARTING,
+    STOPPING,
+    FAILED
+}
 
 public enum ArtifactType {
     SERVICE = "services",
     LISTENER = "listeners"
 }
 
-# Represents a Ballerina artifact.
-#
-# + name - the name of the artifact.
+// === Core Domain Types ===
+
 public type Artifact record {
     string name;
 };
 
-# Represents the details of a Ballerina artifact.
-public type ArtifactDetail ServiceDetail|ListenerDetail;
+public type Resource record {
+    string[] methods;
+    string url;
+};
 
-# Represents the details of a Ballerina service.
-#
-# + basePath - the base path of the service.  
-# + package - the package where the service is defined.
-# + listeners - the list of listeners to which the service is attached.  
-# + resources - the list of resources in the service.
+public type ListenerDetail record {
+    *Artifact;
+    string protocol?;
+    string package;
+    ArtifactState state?;
+};
+
 public type ServiceDetail record {
     *Artifact;
     string? basePath;
     string package;
     Artifact[] listeners;
     Resource[] resources;
+    ArtifactState state?;
 };
 
-# Represents the details of a Ballerina service resource.
-#
-# + methods - the HTTP methods supported by the resource.  
-# + url - the URL of the resource.
-public type Resource record {
-    string[] methods;
-    string url;
+public type ArtifactDetail ServiceDetail|ListenerDetail;
+
+public type Artifacts record {
+    ListenerDetail[] listeners;
+    ServiceDetail[] services;
 };
 
-# Represents the request details of a Ballerina listener object.
-#
-# + maxUriLength - the maximum URI length.  
-# + maxHeaderSize - the maximum header size.  
-# + maxEntityBodySize - the maximum entity body size.
+public type Node record {
+    string platformName = "ballerina";
+    string platformVersion?;
+    string platformHome?;
+    string ballerinaHome?;
+    string osName?;
+    string osVersion?;
+};
+
+// === Runtime Communication Types ===
+
+public type Heartbeat record {|
+    string runtimeId;
+    RuntimeType runtimeType;
+    RuntimeStatus status;
+    string environment = environment;
+    string project;
+    string component;
+    string version?;
+    Node nodeInfo;
+    Artifacts artifacts;
+    string runtimeHash;
+    time:Utc timestamp;
+|};
+
+public type HeartbeatForHash record {|
+    string runtimeId;
+    RuntimeType runtimeType;
+    RuntimeStatus status;
+    string environment;
+    string project;
+    string component;
+    string version?;
+    Node nodeInfo;
+    Artifacts artifacts;
+|};
+
+public type DeltaHeartbeat record {|
+    string runtimeId;
+    string runtimeHash;
+    time:Utc timestamp;
+|};
+
+// === ICP Control Types ===
+
+public enum ControlCommandStatus {
+    PENDING,
+    SENT,
+    ACKNOWLEDGED,
+    FAILED
+};
+
+public type ControlCommand record {|
+    string commandId;
+    string runtimeId;
+    string targetArtifact;
+    string action;
+    time:Utc issuedAt;
+    ControlCommandStatus status; // pending, sent, acknowledged, failed
+|};
+
+public type HeartbeatResponse record {
+    boolean acknowledged;
+    boolean fullHeartbeatRequired?;
+    ControlCommand[] commands?;
+};
+
+// === Configuration ===
+
+public type IcpServer record {|
+    string serverUrl;
+    string cert;
+    boolean enableSSL;
+    int heartbeatInterval;
+|};
+
+public type Observability record {|
+    string opensearchUrl;
+    string logIndex;
+    boolean metricsEnabled;
+|};
+
+public type IcpConfig record {|
+    IcpServer icp;
+    Observability observability;
+    string keyStorePath;
+    string keyStorePassword;
+|};
+
 public type RequestLimit record {
     int maxUriLength;
     int maxHeaderSize;
     int maxEntityBodySize;
-};
-
-# Represents the details of a Ballerina listener object.
-#
-# + protocol - the protocol of the listener.  
-# + package - the package where the listener is defined.
-public type ListenerDetail record {
-    *Artifact;
-    string? protocol;
-    string package;
-};
-
-# Represents a Ballerina node.
-#
-# + platformName - the platform name.  
-# + platformVersion - the ballerina version.  
-# + ballerinaHome - the ballerina home directory.  
-# + osName - the operating system name.  
-# + osVersion - the operating system version.
-public type Node record {
-    string platformName = "ballerina";
-    string? platformVersion;
-    string? ballerinaHome;
-    string? osName;
-    string? osVersion;
 };

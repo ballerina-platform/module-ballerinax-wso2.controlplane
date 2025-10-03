@@ -38,8 +38,8 @@ import java.util.Map;
 
 import static io.ballerina.lib.wso2.controlplane.Constants.BALLERINA;
 import static io.ballerina.lib.wso2.controlplane.Constants.LISTENER;
-import static io.ballerina.lib.wso2.controlplane.Constants.SERVICES_RESOURCE;
 import static io.ballerina.lib.wso2.controlplane.Constants.SERVICE;
+import static io.ballerina.lib.wso2.controlplane.Constants.SERVICES_RESOURCE;
 
 /**
  * Native function implementations of the wso2 control plane module.
