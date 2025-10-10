@@ -32,7 +32,7 @@ configurable string trustStorePath = check getDefaultTrustStore();
 configurable string trustStorePassword = "ballerina";
 
 // jwt configuration
-configurable string jwtIssuer = "icp-jwt-issuer";
+configurable string jwtIssuer = "icp-runtime-jwt-issuer";
 configurable string|string[] jwtAudience = "icp-server";
 configurable string privateKeyFile = "./resources/keys/private.key";
 configurable decimal jwtExpiryTimeSeconds = 3600;
