@@ -353,7 +353,7 @@ dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "lang.value"},
 	{org = "ballerina", name = "test"},
-	{org = "ballerinax", name = "wso2.controlplane"}
+	{org = "ballerinax", name = "wso2.icp"}
 ]
 modules = [
 	{org = "ballerinax", packageName = "artifacts_tests", moduleName = "artifacts_tests"}
@@ -361,7 +361,7 @@ modules = [
 
 [[package]]
 org = "ballerinax"
-name = "wso2.controlplane"
+name = "wso2.icp"
 version = "1.1.0"
 scope = "testOnly"
 dependencies = [
@@ -376,6 +376,6 @@ dependencies = [
 	{org = "ballerina", name = "uuid"}
 ]
 modules = [
-	{org = "ballerinax", packageName = "wso2.controlplane", moduleName = "wso2.controlplane"}
+	{org = "ballerinax", packageName = "wso2.icp", moduleName = "wso2.icp"}
 ]
 

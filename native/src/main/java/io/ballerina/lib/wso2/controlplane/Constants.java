@@ -1,4 +1,4 @@
-package io.ballerina.lib.wso2.controlplane;
+package io.ballerina.lib.wso2.icp;
 
 public class Constants {
     public static final String BALLERINA_HOME = "ballerinaHome";

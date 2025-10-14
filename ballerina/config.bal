@@ -37,7 +37,7 @@ configurable string|string[] jwtAudience = "icp-server";
 configurable string privateKeyFile = "./resources/keys/private.key";
 configurable decimal jwtExpiryTimeSeconds = 3600;
 
-configurable string runtimeId = ?;
+configurable string runtime = ?;
 configurable string environment = "Dev";
 configurable string component = "default_component";
 configurable string project = "default_project";

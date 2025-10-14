@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.lib.wso2.controlplane;
+package io.ballerina.lib.wso2.icp;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
@@ -26,15 +26,15 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
-import static io.ballerina.lib.wso2.controlplane.Constants.ARTIFACT;
-import static io.ballerina.lib.wso2.controlplane.Constants.BALLERINA_HOME;
-import static io.ballerina.lib.wso2.controlplane.Constants.BAL_HOME;
-import static io.ballerina.lib.wso2.controlplane.Constants.BAL_VERSION;
-import static io.ballerina.lib.wso2.controlplane.Constants.NAME;
-import static io.ballerina.lib.wso2.controlplane.Constants.NODE;
-import static io.ballerina.lib.wso2.controlplane.Constants.OS_NAME;
-import static io.ballerina.lib.wso2.controlplane.Constants.OS_VERSION;
-import static io.ballerina.lib.wso2.controlplane.Constants.PLATFORM_VERSION;
+import static io.ballerina.lib.wso2.icp.Constants.ARTIFACT;
+import static io.ballerina.lib.wso2.icp.Constants.BALLERINA_HOME;
+import static io.ballerina.lib.wso2.icp.Constants.BAL_HOME;
+import static io.ballerina.lib.wso2.icp.Constants.BAL_VERSION;
+import static io.ballerina.lib.wso2.icp.Constants.NAME;
+import static io.ballerina.lib.wso2.icp.Constants.NODE;
+import static io.ballerina.lib.wso2.icp.Constants.OS_NAME;
+import static io.ballerina.lib.wso2.icp.Constants.OS_VERSION;
+import static io.ballerina.lib.wso2.icp.Constants.PLATFORM_VERSION;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -65,7 +65,7 @@ public class Utils {
         return "Ballerina " + version + " (Swan Lake Update " + updateVersionText + ")";
     }
 
-    public static boolean isControlPlaneService(BObject serviceObj, Module currentModule) {
+    public static boolean isicpService(BObject serviceObj, Module currentModule) {
         Type originalType = serviceObj.getOriginalType();
         Module module = originalType.getPackage();
         return module != null && module.equals(currentModule);

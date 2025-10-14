@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-module io.ballerina.lib.wso2.controlplane {
+module io.ballerina.lib.wso2.icp {
     requires io.ballerina.runtime;
 }

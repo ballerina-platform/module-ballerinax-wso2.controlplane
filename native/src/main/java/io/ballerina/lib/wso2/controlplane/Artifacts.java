@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.lib.wso2.controlplane;
+package io.ballerina.lib.wso2.icp;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
@@ -36,10 +36,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.lib.wso2.controlplane.Constants.BALLERINA;
-import static io.ballerina.lib.wso2.controlplane.Constants.LISTENER;
-import static io.ballerina.lib.wso2.controlplane.Constants.SERVICE;
-import static io.ballerina.lib.wso2.controlplane.Constants.SERVICES_RESOURCE;
+import static io.ballerina.lib.wso2.icp.Constants.BALLERINA;
+import static io.ballerina.lib.wso2.icp.Constants.LISTENER;
+import static io.ballerina.lib.wso2.icp.Constants.SERVICE;
+import static io.ballerina.lib.wso2.icp.Constants.SERVICES_RESOURCE;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -68,7 +68,7 @@ public class Artifacts {
         Type artifactType = TypeUtils.getImpliedType(typedesc.getDescribingType());
         List<BListInitialValueEntry> artifactEntries;
         if (resourceType.getValue().equals(SERVICES_RESOURCE)) {
-            artifactEntries =  SERVICES.getServiceList(currentModule);
+            artifactEntries = SERVICES.getServiceList(currentModule);
         } else {
             artifactEntries = LISTENERS.getListenerList(currentModule);
         }
@@ -80,7 +80,7 @@ public class Artifacts {
         List<Artifact> httpArtifacts = new ArrayList<>();
         for (Artifact artifact : artifacts) {
             BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
-            if (Utils.isControlPlaneService(serviceObj, currentModule)) {
+            if (Utils.isicpService(serviceObj, currentModule)) {
                 continue;
             }
             List<BObject> listeners = (List<BObject>) artifact.getDetail(Constants.LISTENERS);
@@ -88,7 +88,7 @@ public class Artifacts {
                 Type listenerType = TypeUtils.getImpliedType(listener.getOriginalType());
                 Module typePackage = listenerType.getPackage();
                 if (listenerType.getName().equals(LISTENER) && typePackage.getOrg().equals(BALLERINA)
-                    && typePackage.getName().equals("http")) {
+                        && typePackage.getName().equals("http")) {
                     httpArtifacts.add(artifact);
                     break;
                 }
@@ -100,7 +100,7 @@ public class Artifacts {
     private static void populateArtifactNamesMap() {
         for (Artifact artifact : artifacts) {
             BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
-            if (Utils.isControlPlaneService(serviceObj, currentModule)) {
+            if (Utils.isicpService(serviceObj, currentModule)) {
                 continue;
             }
             if (!SERVICE_NAMES_MAP.containsKey(serviceObj)) {
@@ -123,11 +123,11 @@ public class Artifacts {
         }
         String value = name.getValue();
         if (resourceType.getValue().equals(SERVICES_RESOURCE)) {
-           Artifact artifact = getServiceArtifact(value);
-           if (artifact == null) {
-               return ErrorCreator.createError(StringUtils.fromString("No service found with the name: " + name));
-           }
-           return SERVICES.getDetailedService(artifact, currentModule);
+            Artifact artifact = getServiceArtifact(value);
+            if (artifact == null) {
+                return ErrorCreator.createError(StringUtils.fromString("No service found with the name: " + name));
+            }
+            return SERVICES.getDetailedService(artifact, currentModule);
         } else {
             BObject listenerObject = getListenerArtifact(value);
             if (listenerObject == null) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.lib.wso2.controlplane;
+package io.ballerina.lib.wso2.icp;
 
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -31,24 +31,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.ballerina.lib.wso2.controlplane.Artifacts.LISTENER_NAMES_MAP;
-import static io.ballerina.lib.wso2.controlplane.Constants.HOST;
-import static io.ballerina.lib.wso2.controlplane.Constants.HTTP;
-import static io.ballerina.lib.wso2.controlplane.Constants.HTTPS;
-import static io.ballerina.lib.wso2.controlplane.Constants.HTTP_VERSION;
-import static io.ballerina.lib.wso2.controlplane.Constants.INFERRED_CONFIG;
-import static io.ballerina.lib.wso2.controlplane.Constants.LISTENERS;
-import static io.ballerina.lib.wso2.controlplane.Constants.LISTENER_DETAIL;
-import static io.ballerina.lib.wso2.controlplane.Constants.NAME;
-import static io.ballerina.lib.wso2.controlplane.Constants.PACKAGE;
-import static io.ballerina.lib.wso2.controlplane.Constants.PORT;
-import static io.ballerina.lib.wso2.controlplane.Constants.PROTOCOL;
-import static io.ballerina.lib.wso2.controlplane.Constants.REQUEST_LIMIT;
-import static io.ballerina.lib.wso2.controlplane.Constants.REQUEST_LIMITS;
-import static io.ballerina.lib.wso2.controlplane.Constants.SECURE_SOCKET;
-import static io.ballerina.lib.wso2.controlplane.Constants.SERVICE;
-import static io.ballerina.lib.wso2.controlplane.Constants.TIMEOUT;
-import static io.ballerina.lib.wso2.controlplane.Utils.getArtifact;
+import static io.ballerina.lib.wso2.icp.Artifacts.LISTENER_NAMES_MAP;
+import static io.ballerina.lib.wso2.icp.Constants.HOST;
+import static io.ballerina.lib.wso2.icp.Constants.HTTP;
+import static io.ballerina.lib.wso2.icp.Constants.HTTPS;
+import static io.ballerina.lib.wso2.icp.Constants.HTTP_VERSION;
+import static io.ballerina.lib.wso2.icp.Constants.INFERRED_CONFIG;
+import static io.ballerina.lib.wso2.icp.Constants.LISTENERS;
+import static io.ballerina.lib.wso2.icp.Constants.LISTENER_DETAIL;
+import static io.ballerina.lib.wso2.icp.Constants.NAME;
+import static io.ballerina.lib.wso2.icp.Constants.PACKAGE;
+import static io.ballerina.lib.wso2.icp.Constants.PORT;
+import static io.ballerina.lib.wso2.icp.Constants.PROTOCOL;
+import static io.ballerina.lib.wso2.icp.Constants.REQUEST_LIMIT;
+import static io.ballerina.lib.wso2.icp.Constants.REQUEST_LIMITS;
+import static io.ballerina.lib.wso2.icp.Constants.SECURE_SOCKET;
+import static io.ballerina.lib.wso2.icp.Constants.SERVICE;
+import static io.ballerina.lib.wso2.icp.Constants.TIMEOUT;
+import static io.ballerina.lib.wso2.icp.Utils.getArtifact;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -69,7 +69,7 @@ public class Listeners {
     private Set<BObject> getNonDuplicatedListeners(List<Artifact> artifacts, Module currentModule) {
         Set<BObject> listeners = new HashSet<>();
         for (Artifact artifact : artifacts) {
-            if (Utils.isControlPlaneService((BObject) artifact.getDetail(SERVICE), currentModule)) {
+            if (Utils.isicpService((BObject) artifact.getDetail(SERVICE), currentModule)) {
                 continue;
             }
             listeners.addAll((List<BObject>) artifact.getDetail(LISTENERS));
@@ -85,8 +85,7 @@ public class Listeners {
         listenerRecord.put(StringUtils.fromString(PORT), listener.get(StringUtils.fromString(PORT)));
         listenerRecord.put(StringUtils.fromString(PACKAGE),
                 StringUtils.fromString(originalType.getPackage().toString()));
-        BMap<BString, Object> config = (BMap<BString, Object>)
-                listener.get(StringUtils.fromString(INFERRED_CONFIG));
+        BMap<BString, Object> config = (BMap<BString, Object>) listener.get(StringUtils.fromString(INFERRED_CONFIG));
         listenerRecord.put(StringUtils.fromString(HTTP_VERSION),
                 StringUtils.fromString(config.get(StringUtils.fromString(HTTP_VERSION)).toString()));
         listenerRecord.put(StringUtils.fromString(HOST),
@@ -103,8 +102,7 @@ public class Listeners {
     }
 
     private static BString getListenerProtocol(BObject listener) {
-        BMap<BString, Object> config = (BMap<BString, Object>)
-                listener.get(StringUtils.fromString(INFERRED_CONFIG));
+        BMap<BString, Object> config = (BMap<BString, Object>) listener.get(StringUtils.fromString(INFERRED_CONFIG));
         Object secureSocket = config.get(StringUtils.fromString(SECURE_SOCKET));
         return StringUtils.fromString(secureSocket == null ? HTTP : HTTPS);
     }

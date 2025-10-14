@@ -22,7 +22,7 @@ plugins {
 
 description = 'Ballerina - Integration control plane'
 
-def packageName = "wso2.controlplane"
+def packageName = "wso2.icp"
 def packageOrg = "ballerinax"
 
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
@@ -104,7 +104,7 @@ clean {
 
 updateTomlFiles.dependsOn copyStdlibs
 
-build.dependsOn ":wso2.controlplane-ballerina:generatePomFileForMavenPublication"
+build.dependsOn ":wso2.icp-ballerina:generatePomFileForMavenPublication"
 build.dependsOn ":${packageName}-native:build"
 build.dependsOn deleteDependencyTomlFiles
 

@@ -1,13 +1,13 @@
 [package]
 org = "ballerinax"
-name = "wso2.controlplane"
+name = "wso2.icp"
 version = "@toml.version@"
 distribution = "@ballerina.version@"
-repository = "https://github.com/ballerina-platform/module-ballerinax-wso2.controlplane"
+repository = "https://github.com/ballerina-platform/module-ballerinax-wso2.icp"
 license = ["Apache-2.0"]
 
 [platform.java21]
 graalvmCompatible = true
 
 [[platform.java21.dependency]]
-path = "../native/build/libs/wso2.controlplane-native-@project.version@.jar"
+path = "../native/build/libs/wso2.icp-native-@project.version@.jar"
