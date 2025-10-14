@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.12.7"
+distribution-version = "2201.12.2"
 
 [[package]]
 org = "ballerina"
@@ -321,7 +321,7 @@ dependencies = [
 
 [[package]]
 org = "ballerinax"
-name = "wso2.controlplane"
+name = "wso2.icp"
 version = "1.1.0"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
@@ -336,6 +336,6 @@ dependencies = [
 	{org = "ballerina", name = "time"}
 ]
 modules = [
-	{org = "ballerinax", packageName = "wso2.controlplane", moduleName = "wso2.controlplane"}
+	{org = "ballerinax", packageName = "wso2.icp", moduleName = "wso2.icp"}
 ]
 
