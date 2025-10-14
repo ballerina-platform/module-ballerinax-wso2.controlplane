@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.ballerina.lib.wso2.controlplane;
+package io.ballerina.lib.wso2.icp;
 
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.creators.TypeCreator;
@@ -36,22 +36,22 @@ import io.ballerina.runtime.api.values.BString;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.lib.wso2.controlplane.Artifacts.LISTENER_NAMES_MAP;
-import static io.ballerina.lib.wso2.controlplane.Artifacts.SERVICE_NAMES_MAP;
-import static io.ballerina.lib.wso2.controlplane.Constants.ARTIFACT;
-import static io.ballerina.lib.wso2.controlplane.Constants.ATTACH_POINT;
-import static io.ballerina.lib.wso2.controlplane.Constants.BASE_PATH;
-import static io.ballerina.lib.wso2.controlplane.Constants.LISTENERS;
-import static io.ballerina.lib.wso2.controlplane.Constants.METHODS;
-import static io.ballerina.lib.wso2.controlplane.Constants.NAME;
-import static io.ballerina.lib.wso2.controlplane.Constants.PACKAGE;
-import static io.ballerina.lib.wso2.controlplane.Constants.RESOURCE;
-import static io.ballerina.lib.wso2.controlplane.Constants.RESOURCES;
-import static io.ballerina.lib.wso2.controlplane.Constants.SERVICE;
-import static io.ballerina.lib.wso2.controlplane.Constants.SERVICE_DETAIL;
-import static io.ballerina.lib.wso2.controlplane.Constants.SINGLE_SLASH;
-import static io.ballerina.lib.wso2.controlplane.Constants.URL;
-import static io.ballerina.lib.wso2.controlplane.Utils.getArtifact;
+import static io.ballerina.lib.wso2.icp.Artifacts.LISTENER_NAMES_MAP;
+import static io.ballerina.lib.wso2.icp.Artifacts.SERVICE_NAMES_MAP;
+import static io.ballerina.lib.wso2.icp.Constants.ARTIFACT;
+import static io.ballerina.lib.wso2.icp.Constants.ATTACH_POINT;
+import static io.ballerina.lib.wso2.icp.Constants.BASE_PATH;
+import static io.ballerina.lib.wso2.icp.Constants.LISTENERS;
+import static io.ballerina.lib.wso2.icp.Constants.METHODS;
+import static io.ballerina.lib.wso2.icp.Constants.NAME;
+import static io.ballerina.lib.wso2.icp.Constants.PACKAGE;
+import static io.ballerina.lib.wso2.icp.Constants.RESOURCE;
+import static io.ballerina.lib.wso2.icp.Constants.RESOURCES;
+import static io.ballerina.lib.wso2.icp.Constants.SERVICE;
+import static io.ballerina.lib.wso2.icp.Constants.SERVICE_DETAIL;
+import static io.ballerina.lib.wso2.icp.Constants.SINGLE_SLASH;
+import static io.ballerina.lib.wso2.icp.Constants.URL;
+import static io.ballerina.lib.wso2.icp.Utils.getArtifact;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -64,7 +64,7 @@ public class Services {
         List<BListInitialValueEntry> artifactEntries = new ArrayList<>();
         for (Artifact artifact : Artifacts.artifacts) {
             BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
-            if (Utils.isControlPlaneService(serviceObj, currentModule)) {
+            if (Utils.isicpService(serviceObj, currentModule)) {
                 continue;
             }
             artifactEntries.add(ValueCreator.createListInitialValueEntry(
@@ -80,8 +80,8 @@ public class Services {
         service.put(StringUtils.fromString(NAME), StringUtils.fromString(SERVICE_NAMES_MAP.get(serviceObj)));
         service.put(StringUtils.fromString(BASE_PATH), getAttachPointString(artifact));
         service.put(StringUtils.fromString(PACKAGE), StringUtils.fromString(originalType.getPackage().toString()));
-        service.put(StringUtils.fromString(LISTENERS), getServiceListeners((List<BObject>)
-                artifact.getDetail(LISTENERS), currentModule));
+        service.put(StringUtils.fromString(LISTENERS),
+                getServiceListeners((List<BObject>) artifact.getDetail(LISTENERS), currentModule));
         service.put(StringUtils.fromString(RESOURCES), getServiceResources(serviceObj, currentModule));
         return ValueCreator.createReadonlyRecordValue(currentModule, SERVICE_DETAIL, service);
     }
@@ -125,8 +125,8 @@ public class Services {
     }
 
     private static BArray getAccessorArray(ResourceMethodType resourceMethod) {
-       return ValueCreator.createReadonlyArrayValue(new BString[]
-               {StringUtils.fromString(resourceMethod.getAccessor())});
+        return ValueCreator
+                .createReadonlyArrayValue(new BString[] { StringUtils.fromString(resourceMethod.getAccessor()) });
     }
 
     private static Object getAttachPointString(Artifact artifact) {

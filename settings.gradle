@@ -38,17 +38,17 @@ plugins {
     id "com.gradle.enterprise" version "3.2"
 }
 
-rootProject.name = 'module-ballerinax-wso2.controlplane'
+rootProject.name = 'module-ballerinax-wso2.icp'
 
 include ':checkstyle'
-include ':wso2.controlplane-native'
-include ':wso2.controlplane-ballerina'
-include ':wso2.controlplane-ballerina-tests'
+include ':wso2.icp-native'
+include ':wso2.icp-ballerina'
+include ':wso2.icp-ballerina-tests'
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
-project(':wso2.controlplane-native').projectDir = file('native')
-project(':wso2.controlplane-ballerina').projectDir = file('ballerina')
-project(':wso2.controlplane-ballerina-tests').projectDir = file('ballerina-tests')
+project(':wso2.icp-native').projectDir = file('native')
+project(':wso2.icp-ballerina').projectDir = file('ballerina')
+project(':wso2.icp-ballerina-tests').projectDir = file('ballerina-tests')
 
 gradleEnterprise {
     buildScan {

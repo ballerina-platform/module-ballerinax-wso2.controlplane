@@ -17,7 +17,7 @@
 import ballerina/http;
 import ballerina/lang.value;
 import ballerina/test;
-import ballerinax/wso2.controlplane as cp;
+import ballerinax/wso2.icp as cp;
 
 configurable string testURL = ?;
 configurable int testPort = ?;

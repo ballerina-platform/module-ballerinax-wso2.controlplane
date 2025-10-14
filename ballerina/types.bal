@@ -90,7 +90,7 @@ public type Node record {
 // === Runtime Communication Types ===
 
 public type Heartbeat record {|
-    string runtimeId;
+    string runtime;
     RuntimeType runtimeType;
     RuntimeStatus status;
     string environment = environment;
@@ -103,8 +103,19 @@ public type Heartbeat record {|
     time:Utc timestamp;
 |};
 
+# Description.
+#
+# + runtime - field description  
+# + runtimeType - field description  
+# + status - field description  
+# + environment - field description  
+# + project - field description  
+# + component - field description  
+# + version - field description  
+# + nodeInfo - field description  
+# + artifacts - field description
 public type HeartbeatForHash record {|
-    string runtimeId;
+    string runtime;
     RuntimeType runtimeType;
     RuntimeStatus status;
     string environment;
@@ -116,7 +127,7 @@ public type HeartbeatForHash record {|
 |};
 
 public type DeltaHeartbeat record {|
-    string runtimeId;
+    string runtime;
     string runtimeHash;
     time:Utc timestamp;
 |};

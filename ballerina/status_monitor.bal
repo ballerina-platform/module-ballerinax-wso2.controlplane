@@ -21,7 +21,7 @@ import ballerina/time;
 isolated function getHeartbeat() returns Heartbeat|error {
     // First create heartbeat data without hash and timestamp
     HeartbeatForHash heartbeatForHash = {
-        runtimeId: runtimeId,
+        runtime: runtime,
         runtimeType: BI,
         status: RUNNING,
         nodeInfo: check getBallerinaNode(),
@@ -40,7 +40,7 @@ isolated function getHeartbeat() returns Heartbeat|error {
 
     // Create full heartbeat with hash and timestamp
     Heartbeat heartbeat = {
-        runtimeId: heartbeatForHash.runtimeId,
+        runtime: heartbeatForHash.runtime,
         runtimeType: heartbeatForHash.runtimeType,
         status: heartbeatForHash.status,
         nodeInfo: heartbeatForHash.nodeInfo,
@@ -58,7 +58,7 @@ isolated function getHeartbeat() returns Heartbeat|error {
 
 isolated function getDeltaHeartbeat(Heartbeat heartbeat) returns DeltaHeartbeat|error {
     DeltaHeartbeat deltaHeartbeat = {
-        runtimeId: heartbeat.runtimeId,
+        runtime: heartbeat.runtime,
         runtimeHash: heartbeat.runtimeHash,
         timestamp: heartbeat.timestamp
     };
@@ -90,15 +90,15 @@ isolated function getListeners() returns Artifact[]|error {
 }
 
 isolated function getBallerinaNode() returns Node|error = @java:Method {
-    'class: "io.ballerina.lib.wso2.controlplane.Utils"
+    'class: "io.ballerina.lib.wso2.icp.Utils"
 } external;
 
 isolated function getDetailedArtifact(string resourceType, string name) returns ArtifactDetail|error =
 @java:Method {
-    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
+    'class: "io.ballerina.lib.wso2.icp.Artifacts"
 } external;
 
 isolated function getArtifacts(string resourceType, typedesc<anydata> t) returns Artifact[]|error =
 @java:Method {
-    'class: "io.ballerina.lib.wso2.controlplane.Artifacts"
+    'class: "io.ballerina.lib.wso2.icp.Artifacts"
 } external;

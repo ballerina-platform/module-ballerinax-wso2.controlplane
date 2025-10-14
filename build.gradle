@@ -79,5 +79,5 @@ release {
 }
 
 task build {
-    dependsOn('wso2.controlplane-ballerina:build')
+    dependsOn('wso2.icp-ballerina:build')
 }

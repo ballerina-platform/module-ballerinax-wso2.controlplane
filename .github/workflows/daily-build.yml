@@ -11,4 +11,4 @@ jobs:
     uses: ballerina-platform/ballerina-library/.github/workflows/daily-build-connector-template.yml@main
     secrets: inherit
     with:
-      repo-name: module-ballerinax-wso2.controlplane
+      repo-name: module-ballerinax-wso2.icp

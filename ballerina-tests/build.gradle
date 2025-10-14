@@ -24,13 +24,13 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 description = 'Ballerina - WSO2 Control Plane Tests'
 
-def packageName = "wso2.controlplane"
+def packageName = "wso2.icp"
 def packageOrg = "ballerina"
 def moduleName = "tests"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/BallerinaTest.toml")
-def testCoverageParams = "--code-coverage --coverage-format=xml --includes=io.ballerina.wso2.controlplane.*:ballerina." +
-        "wso2.controlplane*"
+def testCoverageParams = "--code-coverage --coverage-format=xml --includes=io.ballerina.wso2.icp.*:ballerina." +
+        "wso2.icp*"
 def testPackages = ["artifacts-tests"]
 
 def stripBallerinaExtensionVersion(String extVersion) {

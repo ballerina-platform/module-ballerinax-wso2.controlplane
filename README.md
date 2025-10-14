@@ -1,23 +1,23 @@
-# module-ballerinax-wso2.controlplane
+# module-ballerinax-wso2.icp
 
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-wso2.controlplane.svg)](https://github.com/ballerina-platform/module-wso2.controlplane/commits/main)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-wso2.icp.svg)](https://github.com/ballerina-platform/module-wso2.icp/commits/main)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-wso2.controlplane/branch/main/graph/badge.svg?token=5GCQ36HBEB)](https://codecov.io/gh/ballerina-platform/module-ballerinax-wso2.controlplane)
+[![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-wso2.icp/branch/main/graph/badge.svg?token=5GCQ36HBEB)](https://codecov.io/gh/ballerina-platform/module-ballerinax-wso2.icp)
 
 This repository is for adding Ballerina support with WSO2 Integration Control Plane.
 
 ## Adding control plane support to a Ballerina project with services
 
-1. Add `import ballerinax/wso2.controlplane as _;` to the default module.
+1. Add `import ballerinax/wso2.icp as _;` to the default module.
 2. Add `remoteManagement=true` to `[build-options]` section of the Ballerina.toml file.
 3. Create Config.toml file if it does not exist, and add the following configurations.
     ```toml
-    [ballerinax.wso2.controlplane]
+    [ballerinax.wso2.icp]
     # keyStorePath = "../keystore.p12"
     # trustStorePath = "../truststore.p12"
     # icpServicePort = 9264
 
-    [ballerinax.wso2.controlplane.dashboard]
+    [ballerinax.wso2.icp.dashboard]
     url = "https://localhost:9743/dashboard/api"
     heartbeatInterval = 10
     groupId = "cluster1"

@@ -25,9 +25,9 @@ jacoco {
     toolVersion = "${jacocoVersion}"
 }
 
-description = 'Ballerina - WSO2 Controlplane Natives'
+description = 'Ballerina - WSO2 icp Natives'
 
-def packageName = "wso2.controlplane"
+def packageName = "wso2.icp"
 
 dependencies {
     checkstyle project(':checkstyle')
