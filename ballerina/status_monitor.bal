@@ -15,13 +15,42 @@
 // under the License.
 
 import ballerina/crypto;
+import ballerina/file;
+import ballerina/io;
 import ballerina/jballerina.java;
 import ballerina/time;
+import ballerina/uuid;
+
+configurable string runtimeIdFile = ".ballerina_runtime_id";
+
+// Initialize runtime ID once at module load time
+final string runtimeId = check initRuntimeId();
+
+// Get or create a persistent runtime UUID
+isolated function initRuntimeId() returns string|error {
+    // Use current working directory for the runtime ID file
+    string runtimeIdPath = runtimeIdFile;
+
+    // Check if file exists and read the UUID
+    if check file:test(runtimeIdPath, file:EXISTS) {
+        string existingId = check io:fileReadString(runtimeIdPath);
+        // Validate it's not empty and trim whitespace
+        string trimmedId = existingId.trim();
+        if trimmedId.length() > 0 {
+            return trimmedId;
+        }
+    }
+
+    // Generate new UUID if file doesn't exist or is empty
+    string newRuntimeId = uuid:createType1AsString();
+    check io:fileWriteString(runtimeIdPath, newRuntimeId);
+    return newRuntimeId;
+}
 
 isolated function getHeartbeat() returns Heartbeat|error {
     // First create heartbeat data without hash and timestamp
     HeartbeatForHash heartbeatForHash = {
-        runtime: runtime,
+        runtime: runtimeId,
         runtimeType: BI,
         status: RUNNING,
         nodeInfo: check getBallerinaNode(),

@@ -174,8 +174,6 @@ public type Observability record {|
 public type IcpConfig record {|
     IcpServer icp;
     Observability observability;
-    string keyStorePath;
-    string keyStorePassword;
 |};
 
 public type RequestLimit record {
