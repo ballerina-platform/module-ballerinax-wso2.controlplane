@@ -14,9 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/file;
-import ballerina/os;
-
 configurable string serverUrl = "https://localhost:9445";
 configurable int heartbeatInterval = 10;
 configurable string opensearchURL = "";
@@ -24,12 +21,6 @@ configurable string logIndex = "bi-client-logs";
 configurable boolean metricsEnabled = false;
 configurable string cert = "";
 configurable boolean enableSSL = false;
-
-// keystore configs
-configurable string keyStorePath = check getDefaultKeyStore();
-configurable string keyStorePassword = "ballerina";
-configurable string trustStorePath = check getDefaultTrustStore();
-configurable string trustStorePassword = "ballerina";
 
 // jwt configuration
 configurable string jwtIssuer = "icp-runtime-jwt-issuer";
@@ -42,15 +33,7 @@ configurable string environment = "Dev";
 configurable string component = "default_component";
 configurable string project = "default_project";
 
-function getDefaultTrustStore() returns string|error {
-    string trustStorePath = check file:joinPath(os:getEnv("BALLERINA_HOME"), "bre", "security", "ballerinaTruststore.p12");
-    return trustStorePath;
-}
-
-function getDefaultKeyStore() returns string|error {
-    string keyStorePath = check file:joinPath(os:getEnv("BALLERINA_HOME"), "bre", "security", "ballerinaKeystore.p12");
-    return keyStorePath;
-}
+configurable string defaultRuntimeJwtHMACSecret = "default-secret-key-at-least-32-characters-long-for-hs256";
 
 public function loadConfig() returns IcpConfig|error {
     IcpConfig config = {
@@ -64,9 +47,7 @@ public function loadConfig() returns IcpConfig|error {
             opensearchUrl: opensearchURL,
             logIndex: logIndex,
             metricsEnabled: metricsEnabled
-        },
-        keyStorePath: keyStorePath,
-        keyStorePassword: keyStorePassword
+        }
     };
     return config;
 }

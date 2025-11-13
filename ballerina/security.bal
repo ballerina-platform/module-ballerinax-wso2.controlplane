@@ -16,6 +16,11 @@
 
 import ballerina/jwt;
 
+final readonly & jwt:IssuerSignatureConfig jwtSignatureConfig = {
+    algorithm: jwt:HS256,
+    config: defaultRuntimeJwtHMACSecret
+};
+
 isolated function generateJwtToken() returns string|error {
     jwt:IssuerConfig issuerConfig = {
         issuer: jwtIssuer,
@@ -24,16 +29,7 @@ isolated function generateJwtToken() returns string|error {
             "scope": "runtime_agent"
         },
         expTime: jwtExpiryTimeSeconds,
-        signatureConfig: {
-            config: {
-                keyStore: {
-                    path: keyStorePath,
-                    password: keyStorePassword
-                },
-                keyAlias: "ballerina",
-                keyPassword: keyStorePassword
-            }
-        }
+        signatureConfig: jwtSignatureConfig
     };
 
     return jwt:issue(issuerConfig);
