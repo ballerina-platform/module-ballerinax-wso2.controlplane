@@ -8,3 +8,9 @@ graalvmCompatible = true
 
 [build-options]
 remoteManagement=true
+
+[[dependency]]
+org = "ballerinax"
+name = "wso2.icp"
+version="1.1.0"
+repository = "local"
