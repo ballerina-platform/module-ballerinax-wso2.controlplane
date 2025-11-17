@@ -56,7 +56,7 @@ isolated function getHeartbeat() returns Heartbeat|error {
         nodeInfo: check getBallerinaNode(),
         environment: environment,
         project: project,
-        component: component,
+        component: integration,
         artifacts: {
             listeners: check getListenerDetails(),
             services: check getServiceDetails()
