@@ -20,11 +20,13 @@ import ballerina/io;
 import ballerina/jballerina.java;
 import ballerina/time;
 import ballerina/uuid;
+import ballerina/observe;
 
 configurable string runtimeIdFile = ".ballerina_runtime_id";
 
 // Initialize runtime ID once at module load time
 final string runtimeId = check initRuntimeId();
+var _ = check observe:addTag("icp.runtimeId", runtimeId);
 
 // Get or create a persistent runtime UUID
 isolated function initRuntimeId() returns string|error {
