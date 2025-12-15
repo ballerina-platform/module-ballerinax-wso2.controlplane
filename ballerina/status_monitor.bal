@@ -18,33 +18,49 @@ import ballerina/crypto;
 import ballerina/file;
 import ballerina/io;
 import ballerina/jballerina.java;
+import ballerina/observe;
 import ballerina/time;
 import ballerina/uuid;
-import ballerina/observe;
 
-configurable string runtimeIdFile = ".ballerina_runtime_id";
+configurable string runtimeIdFile = ".icp_runtime_id";
 
 // Initialize runtime ID once at module load time
-final string runtimeId = check initRuntimeId();
-var _ = check observe:addTag("icp.runtimeId", runtimeId);
+final string currentRuntimeId = check initializeRuntimeId();
+var _ = check observe:addTag("icp.runtimeId", currentRuntimeId);
 
-// Get or create a persistent runtime UUID
-isolated function initRuntimeId() returns string|error {
+// Initialize runtime ID - check file first, then generate if needed
+isolated function initializeRuntimeId() returns string|error {
     // Use current working directory for the runtime ID file
     string runtimeIdPath = runtimeIdFile;
 
-    // Check if file exists and read the UUID
+    // Check if file exists and read the runtime ID first
     if check file:test(runtimeIdPath, file:EXISTS) {
         string existingId = check io:fileReadString(runtimeIdPath);
-        // Validate it's not empty and trim whitespace
+        // Validate it's not empty and within valid length (max 100 chars)
         string trimmedId = existingId.trim();
-        if trimmedId.length() > 0 {
+        if trimmedId.length() > 0 && trimmedId.length() <= 100 {
             return trimmedId;
         }
     }
 
-    // Generate new UUID if file doesn't exist or is empty
-    string newRuntimeId = uuid:createType1AsString();
+    // Generate new runtime ID if file doesn't exist or is invalid
+    string newRuntimeId;
+    if runtime.trim().length() > 0 {
+        // If configurable ID is provided, append a UUID to it
+        string baseId = runtime.trim();
+        string generatedUuid = uuid:createType1AsString();
+        // Format: {providedId}-{uuid} to ensure uniqueness while preserving the base ID
+        newRuntimeId = string `${baseId}-${generatedUuid}`;
+
+        // Ensure it doesn't exceed 100 characters
+        if newRuntimeId.length() > 100 {
+            newRuntimeId = newRuntimeId.substring(0, 100);
+        }
+    } else {
+        // Generate a full UUID if no configurable ID provided
+        newRuntimeId = uuid:createType1AsString();
+    }
+
     check io:fileWriteString(runtimeIdPath, newRuntimeId);
     return newRuntimeId;
 }
@@ -52,7 +68,7 @@ isolated function initRuntimeId() returns string|error {
 isolated function getHeartbeat() returns Heartbeat|error {
     // First create heartbeat data without hash and timestamp
     HeartbeatForHash heartbeatForHash = {
-        runtime: runtimeId,
+        runtime: currentRuntimeId,
         runtimeType: BI,
         status: RUNNING,
         nodeInfo: check getBallerinaNode(),

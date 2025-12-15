@@ -28,10 +28,10 @@ configurable string|string[] jwtAudience = "icp-server";
 configurable string privateKeyFile = "./resources/keys/private.key";
 configurable decimal jwtExpiryTimeSeconds = 3600;
 
+configurable string runtime = "";
 configurable string environment = "Dev";
 configurable string integration = "default_integration";
 configurable string project = "default_project";
-
 configurable string defaultRuntimeJwtHMACSecret = "default-secret-key-at-least-32-characters-long-for-hs256";
 
 public function loadConfig() returns IcpConfig|error {
