@@ -40,3 +40,6 @@ velocity.log*
 
 # exclude the distribution donwloaded when setting up Ballerina during workflows
 *.deb
+
+# VS Code
+.vscode/
