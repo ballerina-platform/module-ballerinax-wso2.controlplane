@@ -85,10 +85,7 @@ public class HeartbeatJob {
             log:printError("Failed to send delta heartbeat", deltaResponse);
             return;
         }
-        if deltaResponse.acknowledged {
-            log:printInfo("Delta heartbeat acknowledged by ICP server");
-        } else {
-            log:printError("Delta heartbeat not acknowledged by ICP server: " + deltaResponse.toJsonString());
+        if !deltaResponse.acknowledged {
             return;
         }
 

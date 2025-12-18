@@ -52,7 +52,7 @@ public client class IcpClient {
                 log:printInfo("Received control commands: " + heartbeatResponse.commands.toJsonString());
             }
         } else {
-            log:printError("Delta heartbeat not acknowledged by ICP server");
+            log:printError("Delta heartbeat not acknowledged by ICP server: " + heartbeatResponse.toJsonString());
         }
         return heartbeatResponse;
     }
