@@ -158,22 +158,11 @@ public type HeartbeatResponse record {
 
 // === Configuration ===
 
-public type IcpServer record {|
+public type IcpConfig record {|
     string serverUrl;
     string cert;
     boolean enableSSL;
     int heartbeatInterval;
-|};
-
-public type Observability record {|
-    string opensearchUrl;
-    string logIndex;
-    boolean metricsEnabled;
-|};
-
-public type IcpConfig record {|
-    IcpServer icp;
-    Observability observability;
 |};
 
 public type RequestLimit record {

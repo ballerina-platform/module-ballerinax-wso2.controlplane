@@ -33,11 +33,11 @@ function startICPAgent() returns error? {
 
     // Initialize ICP client (JWT is generated internally from config)
     IcpClient icpClient = check new (config);
-    log:printInfo("ICP agent initialized with server URL: " + config.icp.serverUrl);
+    log:printInfo("ICP agent initialized with server URL: " + config.serverUrl);
 
     // Start periodic heartbeat
-    HeartbeatJob heartbeatJob = check new (icpClient, <decimal>config.icp.heartbeatInterval);
-    task:JobId|task:Error result = task:scheduleJobRecurByFrequency(heartbeatJob, <decimal>config.icp.heartbeatInterval);
+    HeartbeatJob heartbeatJob = check new (icpClient, <decimal>config.heartbeatInterval);
+    task:JobId|task:Error result = task:scheduleJobRecurByFrequency(heartbeatJob, <decimal>config.heartbeatInterval);
     if result is task:Error {
         log:printError("Failed to start heartbeat job", result);
         return error("Heartbeat scheduling failed");
