@@ -24,7 +24,7 @@ public client class IcpClient {
     private final string jwtToken;
 
     public function init(IcpConfig config) returns http:ClientError? {
-        self.httpClient = check new (config.icp.serverUrl,
+        self.httpClient = check new (config.serverUrl,
             secureSocket = {
                 cert: cert,
                 enable: enableSSL

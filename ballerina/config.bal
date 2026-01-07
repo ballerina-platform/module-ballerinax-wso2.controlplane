@@ -16,16 +16,12 @@
 
 configurable string serverUrl = "https://localhost:9445";
 configurable int heartbeatInterval = 10;
-configurable string opensearchURL = "";
-configurable string logIndex = "bi-client-logs";
-configurable boolean metricsEnabled = false;
 configurable string cert = "";
 configurable boolean enableSSL = false;
 
 // jwt configuration
 configurable string jwtIssuer = "icp-runtime-jwt-issuer";
 configurable string|string[] jwtAudience = "icp-server";
-configurable string privateKeyFile = "./resources/keys/private.key";
 configurable decimal jwtExpiryTimeSeconds = 3600;
 
 configurable string runtime = "";
@@ -36,17 +32,11 @@ configurable string defaultRuntimeJwtHMACSecret = "default-secret-key-at-least-3
 
 public function loadConfig() returns IcpConfig|error {
     IcpConfig config = {
-        icp: {
-            serverUrl: serverUrl,
-            heartbeatInterval: heartbeatInterval,
-            cert: cert,
-            enableSSL: enableSSL
-        },
-        observability: {
-            opensearchUrl: opensearchURL,
-            logIndex: logIndex,
-            metricsEnabled: metricsEnabled
-        }
+        serverUrl: serverUrl,
+        heartbeatInterval: heartbeatInterval,
+        cert: cert,
+        enableSSL: enableSSL
+
     };
     return config;
 }
