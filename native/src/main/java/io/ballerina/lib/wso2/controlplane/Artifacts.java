@@ -55,6 +55,7 @@ public class Artifacts {
     private static final Listeners LISTENERS = new Listeners();
     static final Map<Object, String> SERVICE_NAMES_MAP = new HashMap<>();
     static final Map<Object, String> LISTENER_NAMES_MAP = new HashMap<>();
+    static final Map<String, BObject> LISTENERS_MAP = new HashMap<>();
     private static int serviceCounter = 1;
     private static int listenerCounter = 1;
 
@@ -154,5 +155,31 @@ public class Artifacts {
             }
         }
         return null;
+    }
+
+    public static Object stopListenerArtifact(Environment env, BString name) {
+        Object objects = new Object[] {};
+        BObject listenerObject = getListenerArtifact(name.getValue());
+        if (listenerObject == null) {
+            return false;
+        }
+        Object result = env.getRuntime().callMethod(listenerObject, "gracefulStop", null, objects);
+        if (result == null) {
+            return true;
+        }
+        return false;
+    }
+
+    public static Object startListenerArtifact(Environment env, BString name) {
+        Object objects = new Object[] {};
+        BObject listenerObject = getListenerArtifact(name.getValue());
+        if (listenerObject == null) {
+            return false;
+        }
+        Object result = env.getRuntime().callMethod(listenerObject, "start", null, objects);
+        if (result == null) {
+            return true;
+        }
+        return false;
     }
 }

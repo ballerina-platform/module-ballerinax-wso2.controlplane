@@ -149,3 +149,13 @@ isolated function getArtifacts(string resourceType, typedesc<anydata> t) returns
 @java:Method {
     'class: "io.ballerina.lib.wso2.icp.Artifacts"
 } external;
+
+isolated function stopListenerArtifact(string name) returns boolean|error =
+@java:Method {
+    'class: "io.ballerina.lib.wso2.icp.Artifacts"
+} external;
+
+isolated function startListenerArtifact(string name) returns boolean|error =
+@java:Method {
+    'class: "io.ballerina.lib.wso2.icp.Artifacts"
+} external;

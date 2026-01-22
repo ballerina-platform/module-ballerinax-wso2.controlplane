@@ -16,6 +16,8 @@
 
 import ballerina/lang.runtime;
 import ballerina/log;
+import ballerina/random;
+// import ballerina/random;
 import ballerina/task;
 
 function init() returns error? {
@@ -57,28 +59,31 @@ public class HeartbeatJob {
     *task:Job;
     private final IcpClient icpClient;
     private final decimal interval;
+    private Heartbeat heartbeat;
+    private int attemptCount = 0;
 
     public function init(IcpClient icpClient, decimal interval) returns error? {
         self.icpClient = icpClient;
         self.interval = interval;
+        Heartbeat|error initHeartbeat = getHeartbeat();
+        if (initHeartbeat is error) {
+            log:printError("Failed to create heartbeat", initHeartbeat);
+            return;
+        }
+        self.heartbeat = initHeartbeat;
     }
 
     # Executes the heartbeat job.
     public function execute() {
-        // Get current integration status
-        Heartbeat|error heartbeat = getHeartbeat();
-        if heartbeat is error {
-            log:printError("Failed to create heartbeat", heartbeat);
-            return;
-        }
 
         // Create delta heartbeat with hash
-        DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(heartbeat);
+        DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(self.heartbeat);
         if deltaHeartbeat is error {
             log:printError("Failed to create delta heartbeat", deltaHeartbeat);
             return;
         }
 
+        self.randomlyStopLister();
         // Send delta heartbeat first
         HeartbeatResponse|error deltaResponse = self.icpClient->sendDeltaHeartbeat(deltaHeartbeat);
         if deltaResponse is error {
@@ -88,12 +93,18 @@ public class HeartbeatJob {
         if !deltaResponse.acknowledged {
             return;
         }
-
+        log:printInfo("Delta heartbeat acknowledged by ICP server");
         // Check if server requests full heartbeat
         boolean fullHeartbeatRequired = deltaResponse.fullHeartbeatRequired ?: false;
         if fullHeartbeatRequired {
             log:printInfo("ICP server requested full heartbeat");
-            error? fullHeartbeatResult = self.icpClient->sendHeartbeat(heartbeat);
+            Heartbeat|error newHeartbeat = getHeartbeat();
+            if newHeartbeat is error {
+                log:printError("Failed to create full heartbeat", newHeartbeat);
+                return;
+            }
+            self.heartbeat = newHeartbeat;
+            error? fullHeartbeatResult = self.icpClient->sendHeartbeat(self.heartbeat);
             if fullHeartbeatResult is error {
                 log:printError("Failed to send full heartbeat", fullHeartbeatResult);
             } else {
@@ -101,6 +112,40 @@ public class HeartbeatJob {
             }
         } else {
             log:printInfo("Delta heartbeat sufficient, no full heartbeat required");
+            if (self.attemptCount < 2) {
+                Heartbeat|error newHeartbeat = getHeartbeat();
+                if newHeartbeat is error {
+                    log:printError("Failed to create full heartbeat", newHeartbeat);
+                    return;
+                }
+                self.heartbeat = newHeartbeat;
+                self.attemptCount += 1;
+            }
+        }
+
+    }
+
+    function randomlyStopLister() {
+        log:printInfo("Randomly deciding to start/stop listener artifact");
+        float randomValue = random:createDecimal();
+        log:printInfo("Generated random value: " + randomValue.toString());
+        if randomValue < 0.8 && self.heartbeat.artifacts.listeners.length() > 0 {
+            log:printInfo("starting listener");
+            boolean|error startResult = startListenerArtifact("listener_2");
+            if startResult is error {
+                log:printError("Failed to start listener artifact", startResult);
+            } else {
+                log:printInfo("Listener artifact started successfully: " + startResult.toString());
+            }
+            return;
+        }
+        log:printInfo("stoping listener");
+        log:printInfo(self.heartbeat.artifacts.listeners.toString());
+        boolean|error stopResult = stopListenerArtifact("listener_2");
+        if stopResult is error {
+            log:printError("Failed to stop listener artifact", stopResult);
+        } else {
+            log:printInfo("Listener artifact stopped successfully: " + stopResult.toString());
         }
     }
 }

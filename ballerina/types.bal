@@ -138,14 +138,20 @@ public enum ControlCommandStatus {
     PENDING,
     SENT,
     ACKNOWLEDGED,
-    FAILED
+    FAILED,
+    COMPLETED
 };
+
+public enum ControlAction {
+    START,
+    STOP
+}
 
 public type ControlCommand record {|
     string commandId;
     string runtimeId;
-    string targetArtifact;
-    string action;
+    Artifact targetArtifact;
+    ControlAction action;
     time:Utc issuedAt;
     ControlCommandStatus status; // pending, sent, acknowledged, failed
 |};
