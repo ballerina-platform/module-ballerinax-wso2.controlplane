@@ -43,4 +43,7 @@ public class Constants {
     public static final String LISTENER_DETAIL = "ListenerDetail";
     public static final String REQUEST_LIMIT = "RequestLimit";
     public static final String NODE = "Node";
+    public static final String STATE = "state";
+    public static final String ENABLED = "ENABLED";
+    public static final String DISABLED = "DISABLED";
 }

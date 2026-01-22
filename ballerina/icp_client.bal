@@ -48,9 +48,6 @@ public client class IcpClient {
         HeartbeatResponse heartbeatResponse = check self.httpClient->post("/icp/deltaHeartbeat", request);
         if heartbeatResponse.acknowledged {
             log:printInfo("Delta heartbeat acknowledged by ICP server");
-            if heartbeatResponse.commands is ControlCommand[] {
-                log:printInfo("Received control commands: " + heartbeatResponse.commands.toJsonString());
-            }
         } else {
             log:printError("Delta heartbeat not acknowledged by ICP server: " + heartbeatResponse.toJsonString());
         }
@@ -67,12 +64,10 @@ public client class IcpClient {
         HeartbeatResponse heartbeatResponse = check self.httpClient->post("/icp/heartbeat", request);
         if heartbeatResponse.acknowledged {
             log:printInfo("Full heartbeat acknowledged by ICP server");
-            if heartbeatResponse.commands is ControlCommand[] {
-                log:printInfo("Received control commands: " + heartbeatResponse.commands.toJsonString());
-            }
         } else {
             log:printError("Full heartbeat not acknowledged by ICP server: " + heartbeatResponse.toJsonString());
             return error("Heartbeat not acknowledged");
         }
     }
 }
+

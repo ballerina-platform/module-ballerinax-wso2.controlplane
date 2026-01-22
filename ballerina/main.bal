@@ -16,14 +16,15 @@
 
 import ballerina/lang.runtime;
 import ballerina/log;
-import ballerina/random;
-// import ballerina/random;
 import ballerina/task;
+
+Heartbeat heartbeat;
 
 function init() returns error? {
     worker w1 returns error? {
         check startICPAgent();
     }
+
 }
 
 function startICPAgent() returns error? {
@@ -59,7 +60,6 @@ public class HeartbeatJob {
     *task:Job;
     private final IcpClient icpClient;
     private final decimal interval;
-    private Heartbeat heartbeat;
     private int attemptCount = 0;
 
     public function init(IcpClient icpClient, decimal interval) returns error? {
@@ -70,20 +70,19 @@ public class HeartbeatJob {
             log:printError("Failed to create heartbeat", initHeartbeat);
             return;
         }
-        self.heartbeat = initHeartbeat;
+        heartbeat = initHeartbeat;
     }
 
     # Executes the heartbeat job.
     public function execute() {
 
         // Create delta heartbeat with hash
-        DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(self.heartbeat);
+        DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(heartbeat);
         if deltaHeartbeat is error {
             log:printError("Failed to create delta heartbeat", deltaHeartbeat);
             return;
         }
 
-        self.randomlyStopLister();
         // Send delta heartbeat first
         HeartbeatResponse|error deltaResponse = self.icpClient->sendDeltaHeartbeat(deltaHeartbeat);
         if deltaResponse is error {
@@ -94,6 +93,8 @@ public class HeartbeatJob {
             return;
         }
         log:printInfo("Delta heartbeat acknowledged by ICP server");
+        self.handleControlCommands(deltaResponse.commands);
+
         // Check if server requests full heartbeat
         boolean fullHeartbeatRequired = deltaResponse.fullHeartbeatRequired ?: false;
         if fullHeartbeatRequired {
@@ -103,8 +104,8 @@ public class HeartbeatJob {
                 log:printError("Failed to create full heartbeat", newHeartbeat);
                 return;
             }
-            self.heartbeat = newHeartbeat;
-            error? fullHeartbeatResult = self.icpClient->sendHeartbeat(self.heartbeat);
+            heartbeat = newHeartbeat;
+            error? fullHeartbeatResult = self.icpClient->sendHeartbeat(heartbeat);
             if fullHeartbeatResult is error {
                 log:printError("Failed to send full heartbeat", fullHeartbeatResult);
             } else {
@@ -112,40 +113,50 @@ public class HeartbeatJob {
             }
         } else {
             log:printInfo("Delta heartbeat sufficient, no full heartbeat required");
+            // Send full heartbeat two times for reliability
             if (self.attemptCount < 2) {
                 Heartbeat|error newHeartbeat = getHeartbeat();
                 if newHeartbeat is error {
                     log:printError("Failed to create full heartbeat", newHeartbeat);
                     return;
                 }
-                self.heartbeat = newHeartbeat;
+                heartbeat = newHeartbeat;
                 self.attemptCount += 1;
             }
         }
-
     }
 
-    function randomlyStopLister() {
-        log:printInfo("Randomly deciding to start/stop listener artifact");
-        float randomValue = random:createDecimal();
-        log:printInfo("Generated random value: " + randomValue.toString());
-        if randomValue < 0.8 && self.heartbeat.artifacts.listeners.length() > 0 {
-            log:printInfo("starting listener");
-            boolean|error startResult = startListenerArtifact("listener_2");
-            if startResult is error {
-                log:printError("Failed to start listener artifact", startResult);
-            } else {
-                log:printInfo("Listener artifact started successfully: " + startResult.toString());
+    function handleControlCommands(ControlCommand[] commands) {
+        foreach ControlCommand command in commands {
+            log:printInfo(string `Handling control command: ${command.toJsonString()}`);
+            command.status = PENDING;
+
+            string artifactName = command.targetArtifact.name;
+            boolean isStart = command.action == START;
+            string action = isStart ? "start" : "stop";
+
+            log:printInfo(string `${isStart ? "Starting" : "Stopping"} listener: ${artifactName}`);
+
+            // Execute the control action
+            boolean|error result = isStart
+                ? startListenerArtifact(artifactName)
+                : stopListenerArtifact(artifactName);
+
+            if result is error {
+                log:printError(string `Failed to ${action} listener: ${artifactName}`, result);
+                command.status = FAILED;
+                continue; // Don't update state if operation failed
             }
-            return;
-        }
-        log:printInfo("stoping listener");
-        log:printInfo(self.heartbeat.artifacts.listeners.toString());
-        boolean|error stopResult = stopListenerArtifact("listener_2");
-        if stopResult is error {
-            log:printError("Failed to stop listener artifact", stopResult);
-        } else {
-            log:printInfo("Listener artifact stopped successfully: " + stopResult.toString());
+
+            // Update artifact state only if operation succeeded
+            log:printInfo(string `Successfully ${action}ed listener: ${artifactName}`);
+            Heartbeat|error newHeartbeat = getHeartbeat();
+            if newHeartbeat is error {
+                log:printError("Failed to create full heartbeat after control command", newHeartbeat);
+                return;
+            }
+            heartbeat = newHeartbeat;
+            command.status = COMPLETED;
         }
     }
 }

@@ -33,10 +33,7 @@ public enum RuntimeStatus {
 
 public enum ArtifactState {
     ENABLED,
-    DISABLED,
-    STARTING,
-    STOPPING,
-    FAILED
+    DISABLED
 }
 
 public enum ArtifactType {
@@ -59,7 +56,7 @@ public type ListenerDetail record {
     *Artifact;
     string protocol?;
     string package;
-    ArtifactState state?;
+    string state = "ENABLED";
 };
 
 public type ServiceDetail record {
@@ -68,7 +65,7 @@ public type ServiceDetail record {
     string package;
     Artifact[] listeners;
     Resource[] resources;
-    ArtifactState state?;
+    string state = "ENABLED";
 };
 
 public type ArtifactDetail ServiceDetail|ListenerDetail;
@@ -147,19 +144,19 @@ public enum ControlAction {
     STOP
 }
 
-public type ControlCommand record {|
+public type ControlCommand record {
     string commandId;
     string runtimeId;
     Artifact targetArtifact;
     ControlAction action;
     time:Utc issuedAt;
     ControlCommandStatus status; // pending, sent, acknowledged, failed
-|};
+};
 
 public type HeartbeatResponse record {
     boolean acknowledged;
     boolean fullHeartbeatRequired?;
-    ControlCommand[] commands?;
+    ControlCommand[] commands = [];
 };
 
 // === Configuration ===

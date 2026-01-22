@@ -56,6 +56,7 @@ public class Artifacts {
     static final Map<Object, String> SERVICE_NAMES_MAP = new HashMap<>();
     static final Map<Object, String> LISTENER_NAMES_MAP = new HashMap<>();
     static final Map<String, BObject> LISTENERS_MAP = new HashMap<>();
+    static final Map<Object, Boolean> LISTENER_STATES_MAP = new HashMap<>();
     private static int serviceCounter = 1;
     private static int listenerCounter = 1;
 
@@ -111,6 +112,7 @@ public class Artifacts {
             for (BObject listener : listeners) {
                 if (!LISTENER_NAMES_MAP.containsKey(listener)) {
                     LISTENER_NAMES_MAP.put(listener, LISTENER_PREFIX + listenerCounter++);
+                    LISTENER_STATES_MAP.put(listener, true); // Default to enabled
                 }
             }
         }
@@ -158,26 +160,49 @@ public class Artifacts {
     }
 
     public static Object stopListenerArtifact(Environment env, BString name) {
-        Object objects = new Object[] {};
         BObject listenerObject = getListenerArtifact(name.getValue());
         if (listenerObject == null) {
             return false;
         }
-        Object result = env.getRuntime().callMethod(listenerObject, "gracefulStop", null, objects);
+
+        // Detach all services attached to this listener
+        for (Artifact artifact : artifacts) {
+            List<BObject> listeners = (List<BObject>) artifact.getDetail(Constants.LISTENERS);
+            if (listeners.contains(listenerObject)) {
+                BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
+                env.getRuntime().callMethod(listenerObject, "detach", null, new Object[] { serviceObj });
+            }
+        }
+
+        // Stop the listener gracefully
+        Object result = env.getRuntime().callMethod(listenerObject, "gracefulStop", null, new Object[] {});
         if (result == null) {
+            LISTENER_STATES_MAP.put(listenerObject, false); // Mark as disabled
             return true;
         }
         return false;
     }
 
     public static Object startListenerArtifact(Environment env, BString name) {
-        Object objects = new Object[] {};
         BObject listenerObject = getListenerArtifact(name.getValue());
         if (listenerObject == null) {
             return false;
         }
-        Object result = env.getRuntime().callMethod(listenerObject, "start", null, objects);
+
+        // Attach all services to this listener
+        for (Artifact artifact : artifacts) {
+            List<BObject> listeners = (List<BObject>) artifact.getDetail(Constants.LISTENERS);
+            if (listeners.contains(listenerObject)) {
+                BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
+                Object attachPoint = artifact.getDetail(Constants.ATTACH_POINT);
+                env.getRuntime().callMethod(listenerObject, "attach", null, new Object[] { serviceObj, attachPoint });
+            }
+        }
+
+        // Start the listener
+        Object result = env.getRuntime().callMethod(listenerObject, "start", null, new Object[] {});
         if (result == null) {
+            LISTENER_STATES_MAP.put(listenerObject, true); // Mark as enabled
             return true;
         }
         return false;

@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Set;
 
 import static io.ballerina.lib.wso2.icp.Artifacts.LISTENER_NAMES_MAP;
+import static io.ballerina.lib.wso2.icp.Artifacts.LISTENER_STATES_MAP;
+import static io.ballerina.lib.wso2.icp.Constants.DISABLED;
+import static io.ballerina.lib.wso2.icp.Constants.ENABLED;
 import static io.ballerina.lib.wso2.icp.Constants.HOST;
 import static io.ballerina.lib.wso2.icp.Constants.HTTP;
 import static io.ballerina.lib.wso2.icp.Constants.HTTPS;
@@ -47,6 +50,7 @@ import static io.ballerina.lib.wso2.icp.Constants.REQUEST_LIMIT;
 import static io.ballerina.lib.wso2.icp.Constants.REQUEST_LIMITS;
 import static io.ballerina.lib.wso2.icp.Constants.SECURE_SOCKET;
 import static io.ballerina.lib.wso2.icp.Constants.SERVICE;
+import static io.ballerina.lib.wso2.icp.Constants.STATE;
 import static io.ballerina.lib.wso2.icp.Constants.TIMEOUT;
 import static io.ballerina.lib.wso2.icp.Utils.getArtifact;
 
@@ -93,6 +97,8 @@ public class Listeners {
         listenerRecord.put(StringUtils.fromString(TIMEOUT),
                 config.get(StringUtils.fromString(TIMEOUT)));
         listenerRecord.put(StringUtils.fromString(REQUEST_LIMITS), getRequestLimit(config, currentModule));
+        listenerRecord.put(StringUtils.fromString(STATE),
+                StringUtils.fromString(LISTENER_STATES_MAP.getOrDefault(listener, true) ? ENABLED : DISABLED));
         return ValueCreator.createReadonlyRecordValue(currentModule, LISTENER_DETAIL, listenerRecord);
     }
 
