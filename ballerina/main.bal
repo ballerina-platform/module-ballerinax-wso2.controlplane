@@ -18,10 +18,13 @@ import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/task;
 
+Heartbeat heartbeat;
+
 function init() returns error? {
     worker w1 returns error? {
         check startICPAgent();
     }
+
 }
 
 function startICPAgent() returns error? {
@@ -57,20 +60,21 @@ public class HeartbeatJob {
     *task:Job;
     private final IcpClient icpClient;
     private final decimal interval;
+    private int attemptCount = 0;
 
     public function init(IcpClient icpClient, decimal interval) returns error? {
         self.icpClient = icpClient;
         self.interval = interval;
+        Heartbeat|error initHeartbeat = getHeartbeat();
+        if (initHeartbeat is error) {
+            log:printError("Failed to create heartbeat", initHeartbeat);
+            return;
+        }
+        heartbeat = initHeartbeat;
     }
 
     # Executes the heartbeat job.
     public function execute() {
-        // Get current integration status
-        Heartbeat|error heartbeat = getHeartbeat();
-        if heartbeat is error {
-            log:printError("Failed to create heartbeat", heartbeat);
-            return;
-        }
 
         // Create delta heartbeat with hash
         DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(heartbeat);
@@ -88,11 +92,19 @@ public class HeartbeatJob {
         if !deltaResponse.acknowledged {
             return;
         }
+        log:printInfo("Delta heartbeat acknowledged by ICP server");
+        self.handleControlCommands(deltaResponse.commands);
 
         // Check if server requests full heartbeat
         boolean fullHeartbeatRequired = deltaResponse.fullHeartbeatRequired ?: false;
         if fullHeartbeatRequired {
             log:printInfo("ICP server requested full heartbeat");
+            Heartbeat|error newHeartbeat = getHeartbeat();
+            if newHeartbeat is error {
+                log:printError("Failed to create full heartbeat", newHeartbeat);
+                return;
+            }
+            heartbeat = newHeartbeat;
             error? fullHeartbeatResult = self.icpClient->sendHeartbeat(heartbeat);
             if fullHeartbeatResult is error {
                 log:printError("Failed to send full heartbeat", fullHeartbeatResult);
@@ -101,6 +113,50 @@ public class HeartbeatJob {
             }
         } else {
             log:printInfo("Delta heartbeat sufficient, no full heartbeat required");
+            // Send full heartbeat two times for reliability
+            if (self.attemptCount < 2) {
+                Heartbeat|error newHeartbeat = getHeartbeat();
+                if newHeartbeat is error {
+                    log:printError("Failed to create full heartbeat", newHeartbeat);
+                    return;
+                }
+                heartbeat = newHeartbeat;
+                self.attemptCount += 1;
+            }
+        }
+    }
+
+    function handleControlCommands(ControlCommand[] commands) {
+        foreach ControlCommand command in commands {
+            log:printInfo(string `Handling control command: ${command.toJsonString()}`);
+            command.status = PENDING;
+
+            string artifactName = command.targetArtifact.name;
+            boolean isStart = command.action == START;
+            string action = isStart ? "start" : "stop";
+
+            log:printInfo(string `${isStart ? "Starting" : "Stopping"} listener: ${artifactName}`);
+
+            // Execute the control action
+            boolean|error result = isStart
+                ? startListenerArtifact(artifactName)
+                : stopListenerArtifact(artifactName);
+
+            if result is error {
+                log:printError(string `Failed to ${action} listener: ${artifactName}`, result);
+                command.status = FAILED;
+                continue; // Don't update state if operation failed
+            }
+
+            // Update artifact state only if operation succeeded
+            log:printInfo(string `Successfully ${action}ed listener: ${artifactName}`);
+            Heartbeat|error newHeartbeat = getHeartbeat();
+            if newHeartbeat is error {
+                log:printError("Failed to create full heartbeat after control command", newHeartbeat);
+                return;
+            }
+            heartbeat = newHeartbeat;
+            command.status = COMPLETED;
         }
     }
 }
