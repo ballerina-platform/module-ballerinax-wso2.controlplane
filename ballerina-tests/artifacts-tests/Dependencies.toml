@@ -323,7 +323,7 @@ dependencies = [
 [[package]]
 org = "ballerinax"
 name = "artifacts_tests"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
 	{org = "ballerina", name = "http"}
 ]
