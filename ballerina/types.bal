@@ -21,25 +21,22 @@ import ballerina/time;
 public enum RuntimeType {
     MI,
     BI
-}
+};
 
 public enum RuntimeStatus {
     RUNNING,
-    FAILED,
-    DISABLED,
-    OFFLINE,
-    STOPPED
-}
+    OFFLINE
+};
 
 public enum ArtifactState {
-    ENABLED,
-    DISABLED
-}
+    ENABLED = "enabled",
+    DISABLED = "disabled"
+};
 
 public enum ArtifactType {
     SERVICE = "services",
     LISTENER = "listeners"
-}
+};
 
 // === Core Domain Types ===
 
@@ -56,7 +53,7 @@ public type ListenerDetail record {
     *Artifact;
     string protocol?;
     string package;
-    string state = "ENABLED";
+    ArtifactState state = "enabled";
 };
 
 public type ServiceDetail record {
@@ -65,7 +62,7 @@ public type ServiceDetail record {
     string package;
     Artifact[] listeners;
     Resource[] resources;
-    string state = "ENABLED";
+    ArtifactState state = "enabled";
 };
 
 public type ArtifactDetail ServiceDetail|ListenerDetail;
@@ -142,7 +139,7 @@ public enum ControlCommandStatus {
 public enum ControlAction {
     START,
     STOP
-}
+};
 
 public type ControlCommand record {
     string commandId;
