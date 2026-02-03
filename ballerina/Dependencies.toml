@@ -8,6 +8,28 @@ dependencies-toml-version = "2"
 distribution-version = "2201.13.0"
 
 [[package]]
+org = "anuruddha"
+name = "wso2.icp"
+version = "1.0.3"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "file"},
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "jwt"},
+	{org = "ballerina", name = "lang.runtime"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "observe"},
+	{org = "ballerina", name = "task"},
+	{org = "ballerina", name = "time"},
+	{org = "ballerina", name = "uuid"}
+]
+modules = [
+	{org = "anuruddha", packageName = "wso2.icp", moduleName = "wso2.icp"}
+]
+
+[[package]]
 org = "ballerina"
 name = "auth"
 version = "2.14.0"
@@ -324,27 +346,5 @@ dependencies = [
 ]
 modules = [
 	{org = "ballerina", packageName = "uuid", moduleName = "uuid"}
-]
-
-[[package]]
-org = "ballerinax"
-name = "wso2.icp"
-version = "1.0.3"
-dependencies = [
-	{org = "ballerina", name = "crypto"},
-	{org = "ballerina", name = "file"},
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "io"},
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "jwt"},
-	{org = "ballerina", name = "lang.runtime"},
-	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "observe"},
-	{org = "ballerina", name = "task"},
-	{org = "ballerina", name = "time"},
-	{org = "ballerina", name = "uuid"}
-]
-modules = [
-	{org = "ballerinax", packageName = "wso2.icp", moduleName = "wso2.icp"}
 ]
 
