@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.13.0"
+distribution-version = "2201.13.1"
 
 [[package]]
 org = "ballerina"
@@ -225,7 +225,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "log"
-version = "2.14.1"
+version = "2.13.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "io"},
