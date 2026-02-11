@@ -27,6 +27,7 @@ import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BListInitialValueEntry;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
@@ -38,8 +39,12 @@ import java.util.Map;
 
 import static io.ballerina.lib.wso2.icp.Constants.BALLERINA;
 import static io.ballerina.lib.wso2.icp.Constants.LISTENER;
+import static io.ballerina.lib.wso2.icp.Constants.PACKAGE_NAME;
+import static io.ballerina.lib.wso2.icp.Constants.PACKAGE_ORG;
+import static io.ballerina.lib.wso2.icp.Constants.PACKAGE_VERSION;
 import static io.ballerina.lib.wso2.icp.Constants.SERVICE;
 import static io.ballerina.lib.wso2.icp.Constants.SERVICES_RESOURCE;
+import static io.ballerina.lib.wso2.icp.Constants.MAIN;
 
 /**
  * Native function implementations of the wso2 control plane module.
@@ -64,8 +69,8 @@ public class Artifacts {
     }
 
     public static Object getArtifacts(Environment env, BString resourceType, BTypedesc typedesc) {
-        artifacts = filterHttpArtifacts(env.getRepository().getArtifacts());
         currentModule = env.getCurrentModule();
+        artifacts = filterHttpArtifacts(env.getRepository().getArtifacts());
         populateArtifactNamesMap();
         Type artifactType = TypeUtils.getImpliedType(typedesc.getDescribingType());
         List<BListInitialValueEntry> artifactEntries;
@@ -82,11 +87,17 @@ public class Artifacts {
         List<Artifact> httpArtifacts = new ArrayList<>();
         for (Artifact artifact : artifacts) {
             BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
-            if (Utils.isicpService(serviceObj, currentModule)) {
+            if (serviceObj == null || Utils.isicpService(serviceObj, currentModule)) {
                 continue;
             }
             List<BObject> listeners = (List<BObject>) artifact.getDetail(Constants.LISTENERS);
+            if (listeners == null) {
+                continue;
+            }
             for (BObject listener : listeners) {
+                if (listener == null) {
+                    continue;
+                }
                 Type listenerType = TypeUtils.getImpliedType(listener.getOriginalType());
                 Module typePackage = listenerType.getPackage();
                 if (listenerType.getName().equals(LISTENER) && typePackage.getOrg().equals(BALLERINA)
@@ -102,14 +113,20 @@ public class Artifacts {
     private static void populateArtifactNamesMap() {
         for (Artifact artifact : artifacts) {
             BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
-            if (Utils.isicpService(serviceObj, currentModule)) {
+            if (serviceObj == null || Utils.isicpService(serviceObj, currentModule)) {
                 continue;
             }
             if (!SERVICE_NAMES_MAP.containsKey(serviceObj)) {
                 SERVICE_NAMES_MAP.put(serviceObj, SERVICE_PREFIX + serviceCounter++);
             }
             List<BObject> listeners = (List<BObject>) artifact.getDetail(Constants.LISTENERS);
+            if (listeners == null) {
+                continue;
+            }
             for (BObject listener : listeners) {
+                if (listener == null) {
+                    continue;
+                }
                 if (!LISTENER_NAMES_MAP.containsKey(listener)) {
                     LISTENER_NAMES_MAP.put(listener, LISTENER_PREFIX + listenerCounter++);
                     LISTENER_STATES_MAP.put(listener, true); // Default to enabled
@@ -168,8 +185,11 @@ public class Artifacts {
         // Detach all services attached to this listener
         for (Artifact artifact : artifacts) {
             List<BObject> listeners = (List<BObject>) artifact.getDetail(Constants.LISTENERS);
-            if (listeners.contains(listenerObject)) {
-                BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
+            if (listeners == null || !listeners.contains(listenerObject)) {
+                continue;
+            }
+            BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
+            if (serviceObj != null) {
                 env.getRuntime().callMethod(listenerObject, "detach", null, new Object[] { serviceObj });
             }
         }
@@ -192,8 +212,11 @@ public class Artifacts {
         // Attach all services to this listener
         for (Artifact artifact : artifacts) {
             List<BObject> listeners = (List<BObject>) artifact.getDetail(Constants.LISTENERS);
-            if (listeners.contains(listenerObject)) {
-                BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
+            if (listeners == null || !listeners.contains(listenerObject)) {
+                continue;
+            }
+            BObject serviceObj = (BObject) artifact.getDetail(SERVICE);
+            if (serviceObj != null) {
                 Object attachPoint = artifact.getDetail(Constants.ATTACH_POINT);
                 env.getRuntime().callMethod(listenerObject, "attach", null, new Object[] { serviceObj, attachPoint });
             }
@@ -206,5 +229,23 @@ public class Artifacts {
             return true;
         }
         return false;
+    }
+
+    public static Object getMainArtifact(Environment env) {
+        List<Artifact> allArtifacts = env.getRepository().getArtifacts();
+        for (Artifact artifact : allArtifacts) {
+            if (artifact.type.toString().equals(MAIN)) {
+                Map<String, Object> details = artifact.getAllDetails();
+                BMap<BString, Object> mainDetail = ValueCreator.createMapValue();
+                mainDetail.put(StringUtils.fromString(PACKAGE_ORG),
+                        StringUtils.fromString((String) details.get(PACKAGE_ORG)));
+                mainDetail.put(StringUtils.fromString(PACKAGE_NAME),
+                        StringUtils.fromString((String) details.get(PACKAGE_NAME)));
+                mainDetail.put(StringUtils.fromString(PACKAGE_VERSION),
+                        StringUtils.fromString((String) details.get(PACKAGE_VERSION)));
+                return ValueCreator.createReadonlyRecordValue(env.getCurrentModule(), "MainDetail", mainDetail);
+            }
+        }
+        return ErrorCreator.createError(StringUtils.fromString("No main artifacts found"));
     }
 }

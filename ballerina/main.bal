@@ -18,16 +18,7 @@ import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/task;
 
-Heartbeat heartbeat;
-
 function init() returns error? {
-    worker w1 returns error? {
-        check startICPAgent();
-    }
-
-}
-
-function startICPAgent() returns error? {
     log:printInfo("Starting ICP agent...");
 
     // Load configuration
@@ -38,6 +29,13 @@ function startICPAgent() returns error? {
     IcpClient icpClient = check new (config);
     log:printInfo("ICP agent initialized with server URL: " + config.serverUrl);
 
+    worker w1 returns error? {
+        check startICPAgent(icpClient, config);
+    }
+
+}
+
+function startICPAgent(IcpClient icpClient, IcpConfig config) returns error? {
     // Start periodic heartbeat
     HeartbeatJob heartbeatJob = check new (icpClient, <decimal>config.heartbeatInterval);
     task:JobId|task:Error result = task:scheduleJobRecurByFrequency(heartbeatJob, <decimal>config.heartbeatInterval);
@@ -55,29 +53,29 @@ function startICPAgent() returns error? {
     }
 }
 
+isolated function sendMainFunctionHeartbeat(IcpClient icpClient, Heartbeat heartbeat) returns error? {
+    check icpClient->sendHeartbeat(heartbeat);
+}
+
 // Heartbeat job
 public class HeartbeatJob {
     *task:Job;
     private final IcpClient icpClient;
     private final decimal interval;
     private int attemptCount = 0;
+    private Heartbeat heartbeat;
 
     public function init(IcpClient icpClient, decimal interval) returns error? {
         self.icpClient = icpClient;
         self.interval = interval;
-        Heartbeat|error initHeartbeat = getHeartbeat();
-        if (initHeartbeat is error) {
-            log:printError("Failed to create heartbeat", initHeartbeat);
-            return;
-        }
-        heartbeat = initHeartbeat;
+        self.heartbeat = check getHeartbeat();
     }
 
     # Executes the heartbeat job.
     public function execute() {
 
         // Create delta heartbeat with hash
-        DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(heartbeat);
+        DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(self.heartbeat);
         if deltaHeartbeat is error {
             log:printError("Failed to create delta heartbeat", deltaHeartbeat);
             return;
@@ -104,8 +102,8 @@ public class HeartbeatJob {
                 log:printError("Failed to create full heartbeat", newHeartbeat);
                 return;
             }
-            heartbeat = newHeartbeat;
-            error? fullHeartbeatResult = self.icpClient->sendHeartbeat(heartbeat);
+            self.heartbeat = newHeartbeat;
+            error? fullHeartbeatResult = self.icpClient->sendHeartbeat(self.heartbeat);
             if fullHeartbeatResult is error {
                 log:printError("Failed to send full heartbeat", fullHeartbeatResult);
             } else {
@@ -120,13 +118,18 @@ public class HeartbeatJob {
                     log:printError("Failed to create full heartbeat", newHeartbeat);
                     return;
                 }
-                heartbeat = newHeartbeat;
+                self.heartbeat = newHeartbeat;
                 self.attemptCount += 1;
             }
         }
     }
 
     function handleControlCommands(ControlCommand[] commands) {
+        if commands.length() == 0 {
+            return;
+        }
+
+        boolean artifactsChanged = false;
         foreach ControlCommand command in commands {
             log:printInfo(string `Handling control command: ${command.toJsonString()}`);
             command.status = PENDING;
@@ -150,13 +153,17 @@ public class HeartbeatJob {
 
             // Update artifact state only if operation succeeded
             log:printInfo(string `Successfully ${action}ed listener: ${artifactName}`);
+            artifactsChanged = true;
+            command.status = COMPLETED;
+        }
+
+        if artifactsChanged {
             Heartbeat|error newHeartbeat = getHeartbeat();
             if newHeartbeat is error {
                 log:printError("Failed to create full heartbeat after control command", newHeartbeat);
                 return;
             }
-            heartbeat = newHeartbeat;
-            command.status = COMPLETED;
+            self.heartbeat = newHeartbeat;
         }
     }
 }

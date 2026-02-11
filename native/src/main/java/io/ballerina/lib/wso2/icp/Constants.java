@@ -46,4 +46,8 @@ public class Constants {
     public static final String STATE = "state";
     public static final String ENABLED = "enabled";
     public static final String DISABLED = "disabled";
+    public static final String PACKAGE_ORG = "packageOrg";
+    public static final String PACKAGE_NAME = "packageName";
+    public static final String PACKAGE_VERSION = "packageVersion";
+    public static final String MAIN = "MAIN";
 }

@@ -33,8 +33,10 @@ dependencies {
     checkstyle project(':checkstyle')
     checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
 
-    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    implementation files(
+        '/Users/anuruddha/Workspace/ballerina/compiler/ballerina-lang/build/libs/ballerina-lang-2201.13.1-SNAPSHOT.jar',
+        '/Users/anuruddha/Workspace/ballerina/bvm/ballerina-runtime/build/libs/ballerina-runtime-2201.13.1-SNAPSHOT.jar'
+    )
 }
 
 test {
@@ -81,5 +83,20 @@ compileJava {
                 '--module-path', classpath.asPath,
         ]
         classpath = files()
+    }
+}
+
+// Verification task to check which JARs are being used
+task verifyJars {
+    doLast {
+        println "\n=== Ballerina JARs in Compile Classpath ==="
+        configurations.compileClasspath.each { file ->
+            if (file.name.contains("ballerina")) {
+                println "  ${file.name}"
+                println "  Path: ${file.absolutePath}"
+                println "  MD5:  ${org.gradle.internal.hash.Hashing.md5().hashFile(file)}"
+                println ""
+            }
+        }
     }
 }

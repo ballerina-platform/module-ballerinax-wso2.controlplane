@@ -77,7 +77,8 @@ isolated function getHeartbeat() returns Heartbeat|error {
         component: integration,
         artifacts: {
             listeners: check getListenerDetails(),
-            services: check getServiceDetails()
+            services: check getServiceDetails(),
+            main: check getMainArtifact()
         }
     };
 
@@ -146,6 +147,11 @@ isolated function getDetailedArtifact(string resourceType, string name) returns 
 } external;
 
 isolated function getArtifacts(string resourceType, typedesc<anydata> t) returns Artifact[]|error =
+@java:Method {
+    'class: "io.ballerina.lib.wso2.icp.Artifacts"
+} external;
+
+isolated function getMainArtifact() returns MainDetail|error =
 @java:Method {
     'class: "io.ballerina.lib.wso2.icp.Artifacts"
 } external;

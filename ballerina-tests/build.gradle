@@ -130,9 +130,13 @@ task initializeVariables {
             testPackages.remove(testPackage)
         }
     }
-    ballerinaDockerTag = getDockerImageTag(project)
-    println("[Info] project builds on docker")
-    println("[Info] using the Ballerina docker image tag: $ballerinaDockerTag")
+    if (!project.hasProperty('useLocalBal')) {
+        ballerinaDockerTag = getDockerImageTag(project)
+        println("[Info] project builds on docker")
+        println("[Info] using the Ballerina docker image tag: $ballerinaDockerTag")
+    } else {
+        println("[Info] project builds using local Ballerina installation")
+    }
 
     gradle.taskGraph.whenReady { graph ->
         if (graph.hasTask(":${packageName}-ballerina-tests:test")) {
@@ -200,25 +204,36 @@ task ballerinaTest {
                 exec {
                     workingDir "${project.projectDir}/${testPackage}"
                     environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-                    createDockerEnvFile("$project.projectDir/$testPackage/docker.env")
                     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                         disableGroups = disableGroups + windowsDisableGroups
                     }
-                    def balTestWithDocker = """
-                            docker run --env-file $project.projectDir/$testPackage/docker.env --rm --net=host -u root \
-                                -v $parentDirectory:/home/ballerina/$parentDirectory.name \
-                                -v $projectDirectory/$testPackage:/home/ballerina/$parentDirectory.name/$projectDirectory.name/$testPackage \
-                                ballerina/ballerina:$ballerinaDockerTag \
-                                /bin/sh -c "cd $parentDirectory.name/$projectDirectory.name/$testPackage && \
-                                $balJavaDebugParam bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
-                        """
-                    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                        commandLine 'cmd', '/c', "$balTestWithDocker && exit %%ERRORLEVEL%%"
+                    
+                    if (!project.hasProperty('useLocalBal')) {
+                        // Docker-based build (default)
+                        createDockerEnvFile("$project.projectDir/$testPackage/docker.env")
+                        def balTestWithDocker = """
+                                docker run --env-file $project.projectDir/$testPackage/docker.env --rm --net=host -u root \
+                                    -v $parentDirectory:/home/ballerina/$parentDirectory.name \
+                                    -v $projectDirectory/$testPackage:/home/ballerina/$parentDirectory.name/$projectDirectory.name/$testPackage \
+                                    ballerina/ballerina:$ballerinaDockerTag \
+                                    /bin/sh -c "cd $parentDirectory.name/$projectDirectory.name/$testPackage && \
+                                    $balJavaDebugParam bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
+                            """
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                            commandLine 'cmd', '/c', "$balTestWithDocker && exit %%ERRORLEVEL%%"
+                        } else {
+                            commandLine 'sh', '-c', "$balTestWithDocker"
+                        }
+                        deleteFile("$project.projectDir/$testPackage/docker.env")
                     } else {
-                        commandLine 'sh', '-c', "$balTestWithDocker"
+                        // Local Ballerina build
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                            commandLine 'cmd', '/c', "bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
+                        } else {
+                            commandLine 'sh', '-c', "bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
+                        }
                     }
                 }
-                deleteFile("$project.projectDir/$testPackage/docker.env")
             }
         }
     }

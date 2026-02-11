@@ -65,11 +65,18 @@ public type ServiceDetail record {
     ArtifactState state = "enabled";
 };
 
-public type ArtifactDetail ServiceDetail|ListenerDetail;
+public type ArtifactDetail ServiceDetail|ListenerDetail|MainDetail;
+
+public type MainDetail record {
+    string packageOrg;
+    string packageName;
+    string packageVersion;
+};
 
 public type Artifacts record {
-    ListenerDetail[] listeners;
-    ServiceDetail[] services;
+    ListenerDetail[] listeners?;
+    ServiceDetail[] services?;
+    MainDetail main?;
 };
 
 public type Node record {
