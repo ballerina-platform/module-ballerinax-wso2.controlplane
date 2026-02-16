@@ -20,6 +20,11 @@ plugins {
     id 'io.ballerina.plugin'
 }
 
+// Force Docker to use linux/amd64 platform for Apple Silicon compatibility
+tasks.withType(Exec) {
+    environment 'DOCKER_DEFAULT_PLATFORM', 'linux/amd64'
+}
+
 description = 'Ballerina - Integration control plane'
 
 def packageName = "wso2.icp"

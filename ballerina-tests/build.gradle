@@ -168,8 +168,14 @@ static boolean isTimeStampVersion(String version) {
 }
 
 static void createDockerEnvFile(String dockerEnvFilePath) {
-    def dockerEnvFileWriter = new PrintWriter("$dockerEnvFilePath", "UTF-8")
+    def dockerEnvFile = new File(dockerEnvFilePath)
+    // Ensure parent directory exists
+    dockerEnvFile.getParentFile().mkdirs()
+    
+    def dockerEnvFileWriter = new PrintWriter(dockerEnvFile, "UTF-8")
     def excludedVariables = ["PATH", "JAVA_HOME", "HOME"]
+    // Force Docker to use linux/amd64 platform for Apple Silicon compatibility
+    dockerEnvFileWriter.println("DOCKER_DEFAULT_PLATFORM=linux/amd64")
     def envVariables = System.getenv()
     envVariables.each { key, value ->
         if (!excludedVariables.contains(key) && !key.startsWith("=")) {
@@ -201,37 +207,44 @@ task ballerinaTest {
     doLast {
         testPackages.each { testPackage ->
             if (!skipTests) {
-                exec {
-                    workingDir "${project.projectDir}/${testPackage}"
-                    environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-                    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                        disableGroups = disableGroups + windowsDisableGroups
-                    }
-                    
-                    if (!project.hasProperty('useLocalBal')) {
-                        // Docker-based build (default)
-                        createDockerEnvFile("$project.projectDir/$testPackage/docker.env")
-                        def balTestWithDocker = """
-                                docker run --env-file $project.projectDir/$testPackage/docker.env --rm --net=host -u root \
+                def dockerEnvPath = "$project.projectDir/$testPackage/docker.env"
+                try {
+                    exec {
+                        workingDir "${project.projectDir}/${testPackage}"
+                        environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                            disableGroups = disableGroups + windowsDisableGroups
+                        }
+                        
+                        if (!project.hasProperty('useLocalBal')) {
+                            // Docker-based build (default)
+                            createDockerEnvFile(dockerEnvPath)
+                            def balTestWithDocker = """
+                                docker run --env-file $dockerEnvPath --rm --net=host -u root \
                                     -v $parentDirectory:/home/ballerina/$parentDirectory.name \
                                     -v $projectDirectory/$testPackage:/home/ballerina/$parentDirectory.name/$projectDirectory.name/$testPackage \
                                     ballerina/ballerina:$ballerinaDockerTag \
                                     /bin/sh -c "cd $parentDirectory.name/$projectDirectory.name/$testPackage && \
                                     $balJavaDebugParam bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
                             """
-                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine 'cmd', '/c', "$balTestWithDocker && exit %%ERRORLEVEL%%"
+                            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                                commandLine 'cmd', '/c', "$balTestWithDocker && exit %%ERRORLEVEL%%"
+                            } else {
+                                commandLine 'sh', '-c', "$balTestWithDocker"
+                            }
                         } else {
-                            commandLine 'sh', '-c', "$balTestWithDocker"
+                            // Local Ballerina build
+                            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                                commandLine 'cmd', '/c', "bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
+                            } else {
+                                commandLine 'sh', '-c', "bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
+                            }
                         }
-                        deleteFile("$project.projectDir/$testPackage/docker.env")
-                    } else {
-                        // Local Ballerina build
-                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine 'cmd', '/c', "bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
-                        } else {
-                            commandLine 'sh', '-c', "bal test ${graalvmFlag} ${parallelTestFlag} ${testParams} ${groupParams} ${disableGroups} ${debugParams}"
-                        }
+                    }
+                } finally {
+                    // Clean up docker.env file after exec completes
+                    if (!project.hasProperty('useLocalBal')) {
+                        deleteFile(dockerEnvPath)
                     }
                 }
             }
