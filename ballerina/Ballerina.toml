@@ -2,7 +2,7 @@
 org = "ballerinax"
 name = "wso2.icp"
 version = "1.0.4"
-distribution = "2201.13.1"
+distribution = "2201.13.2-20260212-143500-e5b29948"
 repository = "https://github.com/ballerina-platform/module-ballerinax-wso2.icp"
 license = ["Apache-2.0"]
 
