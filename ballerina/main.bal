@@ -53,10 +53,6 @@ function startICPAgent(IcpClient icpClient, IcpConfig config) returns error? {
     }
 }
 
-isolated function sendMainFunctionHeartbeat(IcpClient icpClient, Heartbeat heartbeat) returns error? {
-    check icpClient->sendHeartbeat(heartbeat);
-}
-
 // Heartbeat job
 public class HeartbeatJob {
     *task:Job;
@@ -64,6 +60,7 @@ public class HeartbeatJob {
     private final decimal interval;
     private int attemptCount = 0;
     private Heartbeat heartbeat;
+    private boolean fullHeartbeatRequired = true;
 
     public function init(IcpClient icpClient, decimal interval) returns error? {
         self.icpClient = icpClient;
@@ -74,54 +71,36 @@ public class HeartbeatJob {
     # Executes the heartbeat job.
     public function execute() {
 
-        // Create delta heartbeat with hash
-        DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(self.heartbeat);
-        if deltaHeartbeat is error {
-            log:printError("Failed to create delta heartbeat", deltaHeartbeat);
-            return;
-        }
-
-        // Send delta heartbeat first
-        HeartbeatResponse|error deltaResponse = self.icpClient->sendDeltaHeartbeat(deltaHeartbeat);
-        if deltaResponse is error {
-            log:printError("Failed to send delta heartbeat", deltaResponse);
-            return;
-        }
-        if !deltaResponse.acknowledged {
-            return;
-        }
-        log:printInfo("Delta heartbeat acknowledged by ICP server");
-        self.handleControlCommands(deltaResponse.commands);
-
-        // Check if server requests full heartbeat
-        boolean fullHeartbeatRequired = deltaResponse.fullHeartbeatRequired ?: false;
-        if fullHeartbeatRequired {
-            log:printInfo("ICP server requested full heartbeat");
+        HeartbeatResponse|error heartbeatResponse;
+        if (self.fullHeartbeatRequired) {
             Heartbeat|error newHeartbeat = getHeartbeat();
             if newHeartbeat is error {
                 log:printError("Failed to create full heartbeat", newHeartbeat);
                 return;
             }
             self.heartbeat = newHeartbeat;
-            error? fullHeartbeatResult = self.icpClient->sendHeartbeat(self.heartbeat);
-            if fullHeartbeatResult is error {
-                log:printError("Failed to send full heartbeat", fullHeartbeatResult);
-            } else {
-                log:printInfo("Full heartbeat sent successfully");
-            }
+            log:printInfo("Sending full heartbeat to ICP server");
+            heartbeatResponse = self.icpClient->sendHeartbeat(self.heartbeat);
         } else {
-            log:printInfo("Delta heartbeat sufficient, no full heartbeat required");
-            // Send full heartbeat two times for reliability
-            if (self.attemptCount < 2) {
-                Heartbeat|error newHeartbeat = getHeartbeat();
-                if newHeartbeat is error {
-                    log:printError("Failed to create full heartbeat", newHeartbeat);
-                    return;
-                }
-                self.heartbeat = newHeartbeat;
-                self.attemptCount += 1;
+            // Create delta heartbeat with hash
+            DeltaHeartbeat|error deltaHeartbeat = getDeltaHeartbeat(self.heartbeat);
+            if deltaHeartbeat is error {
+                log:printError("Failed to create delta heartbeat", deltaHeartbeat);
+                return;
             }
+            log:printInfo("Sending delta heartbeat to ICP server");
+            heartbeatResponse = self.icpClient->sendDeltaHeartbeat(deltaHeartbeat);
         }
+        if heartbeatResponse is error {
+            log:printError("Heartbeat response error", heartbeatResponse);
+            return;
+        }
+        if !heartbeatResponse.acknowledged {
+            return;
+        }
+        self.fullHeartbeatRequired = heartbeatResponse.fullHeartbeatRequired ?: false;
+        log:printInfo("Heartbeat acknowledged by ICP server");
+        self.handleControlCommands(heartbeatResponse.commands);
     }
 
     function handleControlCommands(ControlCommand[] commands) {
