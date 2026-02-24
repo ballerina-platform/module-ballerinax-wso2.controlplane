@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.13.2-20260220-093800-c76b62a5"
+distribution-version = "2201.13.0-20250927-204700-7b3ef131"
 
 [[package]]
 org = "ballerina"
@@ -109,13 +109,10 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "io"
-version = "1.8.1"
+version = "1.8.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
-]
-modules = [
-	{org = "ballerina", packageName = "io", moduleName = "io"}
 ]
 
 [[package]]
@@ -262,13 +259,9 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "observe"
-version = "1.7.1"
+version = "1.7.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
-]
-modules = [
-	{org = "ballerina", packageName = "observe", moduleName = "observe"},
-	{org = "ballerina", packageName = "observe", moduleName = "observe.mockextension"}
 ]
 
 [[package]]
@@ -296,12 +289,9 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "time"
-version = "2.8.1"
+version = "2.8.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
-]
-modules = [
-	{org = "ballerina", packageName = "time", moduleName = "time"}
 ]
 
 [[package]]
@@ -329,19 +319,16 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "wso2.icp"
-version = "1.0.5"
+version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "file"},
 	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "jwt"},
 	{org = "ballerina", name = "lang.runtime"},
 	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "observe"},
 	{org = "ballerina", name = "task"},
-	{org = "ballerina", name = "time"},
 	{org = "ballerina", name = "uuid"}
 ]
 modules = [
