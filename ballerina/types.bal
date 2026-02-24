@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/log;
 import ballerina/time;
 
 // === Enums ===
@@ -102,19 +103,9 @@ public type Heartbeat record {|
     Artifacts artifacts;
     string runtimeHash;
     time:Utc timestamp;
+    map<log:Level> logLevels?;
 |};
 
-# Description.
-#
-# + runtime - field description  
-# + runtimeType - field description  
-# + status - field description  
-# + environment - field description  
-# + project - field description  
-# + component - field description  
-# + version - field description  
-# + nodeInfo - field description  
-# + artifacts - field description
 public type HeartbeatForHash record {|
     string runtime;
     RuntimeType runtimeType;
@@ -125,6 +116,7 @@ public type HeartbeatForHash record {|
     string version?;
     Node nodeInfo;
     Artifacts artifacts;
+    map<log:Level> logLevels?;
 |};
 
 public type DeltaHeartbeat record {|
@@ -145,7 +137,8 @@ public enum ControlCommandStatus {
 
 public enum ControlAction {
     START,
-    STOP
+    STOP,
+    SET_LOGGER_LEVEL
 };
 
 public type ControlCommand record {
@@ -155,7 +148,13 @@ public type ControlCommand record {
     ControlAction action;
     time:Utc issuedAt;
     ControlCommandStatus status; // pending, sent, acknowledged, failed
+    string payload?;
 };
+
+public type LoggerLevelPayload record {|
+    string componentName;
+    log:Level logLevel;
+|};
 
 public type HeartbeatResponse record {
     boolean acknowledged;

@@ -18,6 +18,7 @@ import ballerina/crypto;
 import ballerina/file;
 import ballerina/io;
 import ballerina/jballerina.java;
+import ballerina/log;
 import ballerina/observe;
 import ballerina/time;
 import ballerina/uuid;
@@ -79,7 +80,8 @@ isolated function getHeartbeat() returns Heartbeat|error {
             listeners: check getListenerDetails(),
             services: check getServiceDetails(),
             main: check getMainArtifact()
-        }
+        },
+        logLevels: getLogLevels()
     };
 
     // Calculate hash from the heartbeat content (excluding timestamp)
@@ -98,10 +100,37 @@ isolated function getHeartbeat() returns Heartbeat|error {
         version: heartbeatForHash.version,
         artifacts: heartbeatForHash.artifacts,
         runtimeHash: runtimeHash,
-        timestamp: time:utcNow()
+        timestamp: time:utcNow(),
+        logLevels: heartbeatForHash.logLevels
     };
 
     return heartbeat;
+}
+
+isolated function getLogLevels() returns map<log:Level> {
+    log:LoggerRegistry registry = log:getLoggerRegistry();
+    string[] ids = registry.getIds();
+    map<log:Level> logLevels = {};
+    foreach string id in ids {
+        log:Logger? logger = registry.getById(id);
+        if logger is log:Logger {
+            logLevels[id] = logger.getLevel();
+        }
+    }
+    return logLevels;
+}
+
+isolated function setLoggerLevel(string loggerId, log:Level logLevel) returns error? {
+    log:LoggerRegistry registry = log:getLoggerRegistry();
+
+    // Get the logger by ID
+    log:Logger? logger = registry.getById(loggerId);
+    if logger is () {
+        return error(string `Logger not found for ID: ${loggerId}`);
+    }
+
+    check logger.setLevel(logLevel);
+    log:printInfo(string `Set log level to ${logLevel} for logger: ${loggerId}`);
 }
 
 isolated function getDeltaHeartbeat(Heartbeat heartbeat) returns DeltaHeartbeat|error {

@@ -113,27 +113,57 @@ public class HeartbeatJob {
             log:printInfo(string `Handling control command: ${command.toJsonString()}`);
             command.status = PENDING;
 
-            string artifactName = command.targetArtifact.name;
-            boolean isStart = command.action == START;
-            string action = isStart ? "start" : "stop";
+            // Handle different command actions
+            error? result = ();
+            match command.action {
+                START|STOP => {
+                    string artifactName = command.targetArtifact.name;
+                    boolean isStart = command.action == START;
+                    string action = isStart ? "start" : "stop";
 
-            log:printInfo(string `${isStart ? "Starting" : "Stopping"} listener: ${artifactName}`);
+                    log:printInfo(string `${isStart ? "Starting" : "Stopping"} listener: ${artifactName}`);
 
-            // Execute the control action
-            boolean|error result = isStart
-                ? startListenerArtifact(artifactName)
-                : stopListenerArtifact(artifactName);
+                    // Execute the control action
+                    boolean|error actionResult = isStart
+                        ? startListenerArtifact(artifactName)
+                        : stopListenerArtifact(artifactName);
 
-            if result is error {
-                log:printError(string `Failed to ${action} listener: ${artifactName}`, result);
-                command.status = FAILED;
-                continue; // Don't update state if operation failed
+                    if actionResult is error {
+                        log:printError(string `Failed to ${action} listener: ${artifactName}`, actionResult);
+                        result = actionResult;
+                    } else {
+                        log:printInfo(string `Successfully ${action}ed listener: ${artifactName}`);
+                        artifactsChanged = true;
+                    }
+                }
+                SET_LOGGER_LEVEL => {
+                    // Parse the payload
+                    string payload = command.payload ?: "";
+                    if payload == "" {
+                        result = error("Missing payload for SET_LOGGER_LEVEL command");
+                    } else {
+                        LoggerLevelPayload|error loggerPayload = payload.fromJsonStringWithType();
+                        if loggerPayload is error {
+                            result = error(string `Failed to parse logger level payload: ${loggerPayload.message()}`);
+                        } else {
+                            log:printInfo(string `Setting log level to ${loggerPayload.logLevel} for logger: ${loggerPayload.componentName}`);
+                            result = setLoggerLevel(loggerPayload.componentName, loggerPayload.logLevel);
+                            if result is () {
+                                log:printInfo(string `Successfully set log level for logger: ${loggerPayload.componentName}`);
+                                artifactsChanged = true;
+                            }
+                        }
+                    }
+                }
             }
 
-            // Update artifact state only if operation succeeded
-            log:printInfo(string `Successfully ${action}ed listener: ${artifactName}`);
-            artifactsChanged = true;
-            command.status = COMPLETED;
+            // Update command status based on result
+            if result is error {
+                log:printError(string `Command failed: ${command.commandId}`, result);
+                command.status = FAILED;
+            } else {
+                command.status = COMPLETED;
+            }
         }
 
         if artifactsChanged {
