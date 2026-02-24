@@ -11,3 +11,14 @@ graalvmCompatible = true
 
 [[platform.java21.dependency]]
 path = "../native/build/libs/wso2.icp-native-0.1.0-SNAPSHOT.jar"
+
+
+[[dependency]]
+org="ballerina"
+name="observe"
+version="1.7.0"
+
+[[dependency]]
+org="ballerinai"
+name="observe"
+version="1.7.0"
