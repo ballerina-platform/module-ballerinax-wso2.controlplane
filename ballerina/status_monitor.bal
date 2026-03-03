@@ -47,11 +47,9 @@ isolated function initializeRuntimeId() returns string|error {
     // Generate new runtime ID if file doesn't exist or is invalid
     string newRuntimeId;
     if runtime.trim().length() > 0 {
-        // If configurable ID is provided, append a UUID to it
+        // If configurable ID is provided, use it directly
         string baseId = runtime.trim();
-        string generatedUuid = uuid:createType1AsString();
-        // Format: {providedId}-{uuid} to ensure uniqueness while preserving the base ID
-        newRuntimeId = string `${baseId}-${generatedUuid}`;
+        newRuntimeId = string `${baseId}`;
 
         // Ensure it doesn't exceed 100 characters
         if newRuntimeId.length() > 100 {
