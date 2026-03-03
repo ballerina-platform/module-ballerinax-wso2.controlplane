@@ -2,7 +2,7 @@
 org = "ballerinax"
 name = "wso2.icp"
 version = "0.1.0"
-distribution = "2201.13.2-20260212-143500-e5b29948"
+distribution = "2201.13.1"
 repository = "https://github.com/ballerina-platform/module-ballerinax-wso2.icp"
 license = ["Apache-2.0"]
 
@@ -11,14 +11,3 @@ graalvmCompatible = true
 
 [[platform.java21.dependency]]
 path = "../native/build/libs/wso2.icp-native-0.1.0-SNAPSHOT.jar"
-
-
-[[dependency]]
-org="ballerina"
-name="observe"
-version="1.7.0"
-
-[[dependency]]
-org="ballerinai"
-name="observe"
-version="1.7.0"
