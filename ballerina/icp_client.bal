@@ -40,11 +40,8 @@ public client class IcpClient {
     // Send delta heartbeat to ICP server
     isolated remote function sendDeltaHeartbeat(DeltaHeartbeat deltaHeartbeat) returns HeartbeatResponse|error {
         http:Request request = new;
-
         request.setHeader(http:AUTH_HEADER, string `${http:AUTH_SCHEME_BEARER} ${check generateJwtToken()}`);
         request.setPayload(deltaHeartbeat);
-        log:printInfo("Sending delta heartbeat to ICP server");
-
         HeartbeatResponse heartbeatResponse = check self.httpClient->post("/icp/deltaHeartbeat", request);
         if heartbeatResponse.acknowledged {
             log:printInfo("Delta heartbeat acknowledged by ICP server");
@@ -55,12 +52,10 @@ public client class IcpClient {
     }
 
     // Send full heartbeat to ICP server
-    isolated remote function sendHeartbeat(Heartbeat heartbeat) returns error? {
+    isolated remote function sendHeartbeat(Heartbeat heartbeat) returns HeartbeatResponse|error {
         http:Request request = new;
         request.setHeader(http:AUTH_HEADER, string `${http:AUTH_SCHEME_BEARER} ${check generateJwtToken()}`);
         request.setPayload(heartbeat);
-        log:printInfo("Sending full heartbeat to ICP server");
-
         HeartbeatResponse heartbeatResponse = check self.httpClient->post("/icp/heartbeat", request);
         if heartbeatResponse.acknowledged {
             log:printInfo("Full heartbeat acknowledged by ICP server");
@@ -68,6 +63,7 @@ public client class IcpClient {
             log:printError("Full heartbeat not acknowledged by ICP server: " + heartbeatResponse.toJsonString());
             return error("Heartbeat not acknowledged");
         }
+        return heartbeatResponse;
     }
 }
 

@@ -18,7 +18,7 @@ import ballerina/jwt;
 
 final readonly & jwt:IssuerSignatureConfig jwtSignatureConfig = {
     algorithm: jwt:HS256,
-    config: defaultRuntimeJwtHMACSecret
+    config: secret
 };
 
 isolated function generateJwtToken() returns string|error {

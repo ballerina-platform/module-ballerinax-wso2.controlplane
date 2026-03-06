@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/log;
 import ballerina/time;
 
 // === Enums ===
@@ -21,25 +22,22 @@ import ballerina/time;
 public enum RuntimeType {
     MI,
     BI
-}
+};
 
 public enum RuntimeStatus {
     RUNNING,
-    FAILED,
-    DISABLED,
-    OFFLINE,
-    STOPPED
-}
+    OFFLINE
+};
 
 public enum ArtifactState {
-    ENABLED,
-    DISABLED
-}
+    ENABLED = "enabled",
+    DISABLED = "disabled"
+};
 
 public enum ArtifactType {
     SERVICE = "services",
     LISTENER = "listeners"
-}
+};
 
 // === Core Domain Types ===
 
@@ -56,7 +54,7 @@ public type ListenerDetail record {
     *Artifact;
     string protocol?;
     string package;
-    string state = "ENABLED";
+    ArtifactState state = "enabled";
 };
 
 public type ServiceDetail record {
@@ -65,14 +63,21 @@ public type ServiceDetail record {
     string package;
     Artifact[] listeners;
     Resource[] resources;
-    string state = "ENABLED";
+    ArtifactState state = "enabled";
 };
 
-public type ArtifactDetail ServiceDetail|ListenerDetail;
+public type ArtifactDetail ServiceDetail|ListenerDetail|MainDetail;
+
+public type MainDetail record {
+    string packageOrg;
+    string packageName;
+    string packageVersion;
+};
 
 public type Artifacts record {
-    ListenerDetail[] listeners;
-    ServiceDetail[] services;
+    ListenerDetail[] listeners?;
+    ServiceDetail[] services?;
+    MainDetail main?;
 };
 
 public type Node record {
@@ -98,19 +103,9 @@ public type Heartbeat record {|
     Artifacts artifacts;
     string runtimeHash;
     time:Utc timestamp;
+    map<log:Level> logLevels?;
 |};
 
-# Description.
-#
-# + runtime - field description  
-# + runtimeType - field description  
-# + status - field description  
-# + environment - field description  
-# + project - field description  
-# + component - field description  
-# + version - field description  
-# + nodeInfo - field description  
-# + artifacts - field description
 public type HeartbeatForHash record {|
     string runtime;
     RuntimeType runtimeType;
@@ -121,6 +116,7 @@ public type HeartbeatForHash record {|
     string version?;
     Node nodeInfo;
     Artifacts artifacts;
+    map<log:Level> logLevels?;
 |};
 
 public type DeltaHeartbeat record {|
@@ -141,8 +137,9 @@ public enum ControlCommandStatus {
 
 public enum ControlAction {
     START,
-    STOP
-}
+    STOP,
+    SET_LOGGER_LEVEL
+};
 
 public type ControlCommand record {
     string commandId;
@@ -151,7 +148,13 @@ public type ControlCommand record {
     ControlAction action;
     time:Utc issuedAt;
     ControlCommandStatus status; // pending, sent, acknowledged, failed
+    string payload?;
 };
+
+public type LoggerLevelPayload record {|
+    string componentName;
+    log:Level logLevel;
+|};
 
 public type HeartbeatResponse record {
     boolean acknowledged;
