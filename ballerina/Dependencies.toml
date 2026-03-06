@@ -329,7 +329,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "wso2.icp"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "file"},
