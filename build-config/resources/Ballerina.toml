@@ -2,6 +2,7 @@
 org = "ballerinax"
 name = "wso2.controlplane"
 version = "@toml.version@"
+keywords = ["Type/Driver", "Vendor/WSO2", "Area/Developer Tools"]
 distribution = "@ballerina.version@"
 repository = "https://github.com/ballerina-platform/module-ballerinax-wso2.controlplane"
 license = ["Apache-2.0"]
