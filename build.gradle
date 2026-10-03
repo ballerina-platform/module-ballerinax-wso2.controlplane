@@ -16,7 +16,7 @@
 
 plugins {
     id "com.github.spotbugs" version "${spotbugsPluginVersion}"
-    id "com.github.johnrengelman.shadow" version "${shadowJarPluginVersion}"
+    id "com.gradleup.shadow" version "${shadowJarPluginVersion}"
     id "de.undercouch.download" version "${downloadPluginVersion}"
     id "net.researchgate.release" version "${releasePluginVersion}"
 }
@@ -78,6 +78,6 @@ release {
     }
 }
 
-task build {
+tasks.named('build') {
     dependsOn('wso2.controlplane-ballerina:build')
 }
