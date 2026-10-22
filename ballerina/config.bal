@@ -30,6 +30,9 @@ function getDefaultTrustStore() returns string|error {
 
 configurable int icpServicePort = 9264;
 
+// Validity period of the issued JWT access token, in seconds.
+configurable decimal jwtExpiryTimeInSeconds = 3600;
+
 function getDefaultKeyStore() returns string|error {
     string keyStorePath = check file:joinPath(os:getEnv("BALLERINA_HOME"), "bre", "security", "ballerinaKeystore.p12");
     return keyStorePath;

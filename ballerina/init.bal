@@ -25,12 +25,13 @@ function init() returns error? {
 }
 
 function registerInDashboardServer() returns error? {
-    if dashboard.url == "" {
+    final string dashboardUrl = dashboard.url;
+    if dashboardUrl == "" {
         return;
     }
     // We need to wait until services are up
     runtime:sleep(dashboard.waitTimeForServicesInSeconds);
-    http:Client dsClient = check new (dashboard.url,
+    http:Client dsClient = check new (dashboardUrl,
         secureSocket = {
             enable: false
         }
@@ -43,22 +44,23 @@ function registerInDashboardServer() returns error? {
         mgtApiUrl: dashboard.mgtApiUrl
     };
 
+    final int heartbeatInterval = dashboard.heartbeatInterval;
     boolean isFailed = true;
     while (true) {
         http:Response|http:ClientError resp = dsClient->post("/heartbeat", connectionRequest);
         if (resp is http:ClientError) {
-            log:printError(string `Connection to dashboard server ${dashboard.url} is failed due to http error ${resp.toString()}. Retrying after ${dashboard.heartbeatInterval} seconds.`);
+            log:printError(string `Connection to dashboard server ${dashboardUrl} is failed due to http error ${resp.toString()}. Retrying after ${heartbeatInterval} seconds.`);
             isFailed = true;
         } else if (resp.statusCode != 200) {
             string|http:ClientError textPayload = resp.getTextPayload();
             if textPayload is string {
-                log:printError(string `Connection to dashboard server ${dashboard.url} is failed due to ${textPayload} with error code ${resp.statusCode}. Retrying after ${dashboard.heartbeatInterval} seconds.`);
+                log:printError(string `Connection to dashboard server ${dashboardUrl} is failed due to ${textPayload} with error code ${resp.statusCode}. Retrying after ${heartbeatInterval} seconds.`);
             } else {
-                log:printError(string `Connection to dashboard server ${dashboard.url} is failed due to client error ${textPayload.message()}. Retrying after ${dashboard.heartbeatInterval} seconds.`);
+                log:printError(string `Connection to dashboard server ${dashboardUrl} is failed due to client error ${textPayload.message()}. Retrying after ${heartbeatInterval} seconds.`);
             }
             isFailed = true;
         } else if (isFailed) {
-            log:printInfo(string `Connected to dashboard server ${dashboard.url}`);
+            log:printInfo(string `Connected to dashboard server ${dashboardUrl}`);
             isFailed = false;
         }
         runtime:sleep(<decimal>dashboard.heartbeatInterval);
