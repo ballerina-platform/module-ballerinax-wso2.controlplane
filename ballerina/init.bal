@@ -44,18 +44,19 @@ function registerInDashboardServer() returns error? {
         mgtApiUrl: dashboard.mgtApiUrl
     };
 
+    final int heartbeatInterval = dashboard.heartbeatInterval;
     boolean isFailed = true;
     while (true) {
         http:Response|http:ClientError resp = dsClient->post("/heartbeat", connectionRequest);
         if (resp is http:ClientError) {
-            log:printError(string `Connection to dashboard server ${dashboardUrl} is failed due to http error ${resp.toString()}. Retrying after ${dashboard.heartbeatInterval} seconds.`);
+            log:printError(string `Connection to dashboard server ${dashboardUrl} is failed due to http error ${resp.toString()}. Retrying after ${heartbeatInterval} seconds.`);
             isFailed = true;
         } else if (resp.statusCode != 200) {
             string|http:ClientError textPayload = resp.getTextPayload();
             if textPayload is string {
-                log:printError(string `Connection to dashboard server ${dashboardUrl} is failed due to ${textPayload} with error code ${resp.statusCode}. Retrying after ${dashboard.heartbeatInterval} seconds.`);
+                log:printError(string `Connection to dashboard server ${dashboardUrl} is failed due to ${textPayload} with error code ${resp.statusCode}. Retrying after ${heartbeatInterval} seconds.`);
             } else {
-                log:printError(string `Connection to dashboard server ${dashboardUrl} is failed due to client error ${textPayload.message()}. Retrying after ${dashboard.heartbeatInterval} seconds.`);
+                log:printError(string `Connection to dashboard server ${dashboardUrl} is failed due to client error ${textPayload.message()}. Retrying after ${heartbeatInterval} seconds.`);
             }
             isFailed = true;
         } else if (isFailed) {
