@@ -1,0 +1,9 @@
+# ballerina:13 (config.bal, types.bal): these match configurable defaults named *Password. keyStorePassword and
+# trustStorePassword default to "ballerina", the publicly documented password of the keystore/truststore bundled with
+# the Ballerina distribution (the default paths point to those files); they are overridable configurables.
+# serviceAccountPassword ("bal_secret") is a overridable configurable default of the DashBoard config record; making
+# these mandatory would change the configuration contract of the package.
+# ballerina:14 (icpService.bal, security.bal): flags `AccessToken: ...generateJwtToken()` and the `password` variable
+# destructured from the decoded Authorization header at runtime. Both are runtime values, not fixed secrets.
+[rule]
+exclude = ["ballerina:13", "ballerina:14"]

@@ -26,7 +26,7 @@ isolated function generateJwtToken() returns string|error {
         issuer: issuer,
         audience: "ballerina",
         username: "admin",
-        expTime: 1715452200000,
+        expTime: jwtExpiryTimeInSeconds,
         signatureConfig: {
             config: {
                 keyStore: {
