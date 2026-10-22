@@ -5,5 +5,8 @@
 # these mandatory would change the configuration contract of the package.
 # ballerina:14 (icpService.bal, security.bal): flags `AccessToken: ...generateJwtToken()` and the `password` variable
 # destructured from the decoded Authorization header at runtime. Both are runtime values, not fixed secrets.
+# TODO: replace this rule exclusion with a targeted scan suppression (with a reason) once `bal scan` supports it
+# (planned for v0.13.0), and fix the false positives on the scan tool side: a secret-named identifier should only be
+# reported when it is assigned a fixed value.
 [rule]
 exclude = ["ballerina:13", "ballerina:14"]
